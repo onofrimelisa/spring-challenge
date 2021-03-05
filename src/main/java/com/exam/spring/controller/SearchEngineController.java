@@ -23,7 +23,8 @@ public class SearchEngineController {
             @RequestParam(value = "price", required = false) String price,
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "prestige", required = false) String prestige,
-            @RequestParam(value = "freeShipping", required = false) String freeShipping){
+            @RequestParam(value = "freeShipping", required = false) String freeShipping,
+            @RequestParam(value = "order", required = false) Integer order){
         Map<String, String> filters = new HashMap<>();
 
         if (category != null) filters.put("category", category);
@@ -33,7 +34,7 @@ public class SearchEngineController {
         if (freeShipping != null) filters.put("freeShipping", freeShipping);
         if (price != null) filters.put("price", price);
 
-        return this.searchEngineService.getProductsWithFilters(filters);
+        return this.searchEngineService.getProductsWithFilters(filters, order);
     }
 
     @ExceptionHandler(SearchEngineException.class)
