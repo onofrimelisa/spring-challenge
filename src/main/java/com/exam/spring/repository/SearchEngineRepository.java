@@ -46,4 +46,9 @@ public class SearchEngineRepository implements ISearchEngineRepository {
 
         return productsList;
     }
+
+    @Override
+    public List<ProductDTO> getProducts() {
+        return this.products;
+    }
 }

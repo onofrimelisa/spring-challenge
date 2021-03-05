@@ -19,7 +19,7 @@ public class SearchEngineController {
 
     @GetMapping("/articles")
     public ProductsListResponseDTO getProducts(){
-        return null;
+        return this.searchEngineService.getProducts();
     }
 
     @ExceptionHandler(SearchEngineException.class)

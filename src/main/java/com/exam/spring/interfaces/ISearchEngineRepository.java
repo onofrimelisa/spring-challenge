@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ISearchEngineRepository {
     List<ProductDTO> loadDatabase() throws ServerErrorException;
+    List<ProductDTO> getProducts();
 }
