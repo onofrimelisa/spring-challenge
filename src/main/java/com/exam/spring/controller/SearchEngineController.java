@@ -1,6 +1,7 @@
 package com.exam.spring.controller;
 
 import com.exam.spring.dto.ErrorDTO;
+import com.exam.spring.dto.ProductsListResponseDTO;
 import com.exam.spring.exception.SearchEngineException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class SearchEngineController {
 
     @GetMapping("/articles")
-    public void getProducts(){
-
+    public ProductsListResponseDTO getProducts(){
+        return null;
     }
 
     @ExceptionHandler(SearchEngineException.class)
