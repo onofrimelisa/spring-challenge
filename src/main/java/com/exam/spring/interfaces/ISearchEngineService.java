@@ -1,4 +1,4 @@
 package com.exam.spring.interfaces;
 
-public interface ISearchEngineService {
+public interface ISearchEngineService{
 }
