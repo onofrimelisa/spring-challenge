@@ -6,10 +6,9 @@ import com.exam.spring.exception.SearchEngineException;
 import com.exam.spring.interfaces.ISearchEngineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -17,9 +16,24 @@ public class SearchEngineController {
     @Autowired
     private ISearchEngineService searchEngineService;
 
-    @GetMapping("/articles")
-    public ProductsListResponseDTO getProducts(){
-        return this.searchEngineService.getProducts();
+    @GetMapping(value = "/articles")
+    public ProductsListResponseDTO getProductsFiltered(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "price", required = false) String price,
+            @RequestParam(value = "brand", required = false) String brand,
+            @RequestParam(value = "prestige", required = false) String prestige,
+            @RequestParam(value = "freeShipping", required = false) String freeShipping){
+        Map<String, String> filters = new HashMap<>();
+
+        if (category != null) filters.put("category", category);
+        if (name != null) filters.put("name", name);
+        if (brand != null) filters.put("brand", brand);
+        if (prestige != null) filters.put("prestige", prestige);
+        if (freeShipping != null) filters.put("freeShipping", freeShipping);
+        if (price != null) filters.put("price", price);
+
+        return this.searchEngineService.getProductsWithFilters(filters);
     }
 
     @ExceptionHandler(SearchEngineException.class)

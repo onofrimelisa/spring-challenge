@@ -13,6 +13,7 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class SearchEngineRepository implements ISearchEngineRepository {
@@ -50,5 +51,62 @@ public class SearchEngineRepository implements ISearchEngineRepository {
     @Override
     public List<ProductDTO> getProducts() {
         return this.products;
+    }
+
+    @Override
+    public List<ProductDTO> filterByCategory(String category, List<ProductDTO> listToFilter){
+        return listToFilter.stream().filter(product -> product.getCategory().equalsIgnoreCase(category)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDTO> filterByName(String name, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDTO> filterByBrand(String brand, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getBrand().equalsIgnoreCase(brand)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDTO> filterByPrice(Double price, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getPrice().compareTo(price) == 0).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDTO> filterByFreeShipping(Boolean freeShipping, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getFreeShipping().equals(freeShipping)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDTO> filterByPrestige(Integer prestige, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getPrestige().compareTo(prestige) == 0).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO> motherList) {
+        switch(filterKey)
+        {
+            case "price":
+                motherList = this.filterByPrice(Double.valueOf(filterValue), motherList);
+                break;
+            case "name":
+                motherList = this.filterByName(filterValue, motherList);
+                break;
+            case "category":
+                motherList = this.filterByCategory(filterValue, motherList);
+                break;
+            case "brand":
+                motherList = this.filterByBrand(filterValue, motherList);
+                break;
+            case "prestige":
+                motherList = this.filterByPrestige(Integer.valueOf(filterValue), motherList);
+                break;
+            case "freeShipping":
+                motherList = this.filterByFreeShipping(Boolean.valueOf(filterValue), motherList);
+                break;
+        }
+
+        return motherList;
     }
 }

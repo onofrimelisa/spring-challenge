@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 public class ProductsListResponseDTO {
     private List<ProductDTO> articles;
+    private Integer total;
 
     public ProductsListResponseDTO() {
         this.articles = new ArrayList<>();
