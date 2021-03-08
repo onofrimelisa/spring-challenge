@@ -3,6 +3,9 @@ package com.exam.spring.repository;
 import com.exam.spring.dto.ErrorDTO;
 import com.exam.spring.dto.ProductDTO;
 import com.exam.spring.exception.ServerErrorException;
+import com.exam.spring.helpers.OrderByName;
+import com.exam.spring.helpers.OrderByPrice;
+import com.exam.spring.interfaces.IOrder;
 import com.exam.spring.interfaces.ISearchEngineRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -84,7 +87,34 @@ public class SearchEngineRepository implements ISearchEngineRepository {
     }
 
     @Override
-    public List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO> motherList) {
+    public List<ProductDTO> orderProducts(List<ProductDTO> productsList, Integer order) {
+        IOrder orderMethod;
+
+        if (!(order == null)) {
+            switch (order){
+                case 0:
+                    orderMethod = new OrderByName(true);
+                    break;
+                case 1:
+                    orderMethod = new OrderByName(false);
+                    break;
+                case 2:
+                    orderMethod = new OrderByPrice(false);
+                    break;
+                default:
+                    orderMethod = new OrderByPrice(true);
+                    break;
+            }
+        }else{
+            orderMethod = new OrderByPrice(true);
+        }
+
+
+        return orderMethod.orderList(productsList);
+    }
+
+    @Override
+    public List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO> motherList, Integer order) {
         switch(filterKey)
         {
             case "name":
@@ -107,6 +137,6 @@ public class SearchEngineRepository implements ISearchEngineRepository {
                 break;
         }
 
-        return motherList;
+        return orderProducts(motherList, order);
     }
 }

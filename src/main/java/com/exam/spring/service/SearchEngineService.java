@@ -28,38 +28,12 @@ public class SearchEngineService implements ISearchEngineService {
     }
 
     @Override
-    public List<ProductDTO> orderProducts(List<ProductDTO> productsList, Integer order) {
-        IOrder orderMethod;
-
-       switch (order){
-            case 0:
-                orderMethod = new OrderByName(true);
-                break;
-            case 1:
-                orderMethod = new OrderByName(false);
-                break;
-            case 2:
-                orderMethod = new OrderByPrice(false);
-                break;
-            default:
-                orderMethod = new OrderByPrice(true);
-                break;
-        }
-
-        return orderMethod.orderList(productsList);
-    }
-
-    @Override
     public ProductsListResponseDTO getProductsWithFilters(Map<String, String> filters, Integer order) {
         List<ProductDTO> productsList = this.getProducts().getArticles();
         ProductsListResponseDTO response = new ProductsListResponseDTO();
 
         for (Map.Entry<String, String> filter : filters.entrySet()) {
-            productsList = this.searchEngineRepository.getProductsWithFilter(filter.getKey(), filter.getValue(), productsList);
-        }
-
-        if (order != null){
-            productsList = this.orderProducts(productsList, order);
+            productsList = this.searchEngineRepository.getProductsWithFilter(filter.getKey(), filter.getValue(), productsList, order);
         }
 
         response.setArticles(productsList);
