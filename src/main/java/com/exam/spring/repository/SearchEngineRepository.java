@@ -2,6 +2,9 @@ package com.exam.spring.repository;
 
 import com.exam.spring.dto.ErrorDTO;
 import com.exam.spring.dto.ProductDTO;
+import com.exam.spring.dto.PurchaseDTO;
+import com.exam.spring.exception.InsufficientStockException;
+import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
 import com.exam.spring.helpers.OrderByName;
 import com.exam.spring.helpers.OrderByPrice;
@@ -16,6 +19,7 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -139,4 +143,26 @@ public class SearchEngineRepository implements ISearchEngineRepository {
 
         return orderProducts(motherList, order);
     }
+
+    @Override
+    public ProductDTO getProductById(Integer id) throws ProductNotFoundException {
+        Optional<ProductDTO> product = this.products.stream().filter(productDTO -> productDTO.getId().equals(id)).findFirst();
+        if (product.isEmpty()) {
+            ErrorDTO errorDTO = new ErrorDTO("Product with id " + id + " not found", HttpStatus.NOT_FOUND);
+            throw new ProductNotFoundException(errorDTO);
+        }
+        return product.get();
+    }
+
+    @Override
+    public void checkStock(List<PurchaseDTO> purchase) throws InsufficientStockException, ProductNotFoundException {
+        for (PurchaseDTO purchaseDTO : purchase) {
+            ProductDTO product = this.getProductById(purchaseDTO.getProductId());
+            if (product.getStock() < purchaseDTO.getQuantity()) {
+                ErrorDTO errorDTO = new ErrorDTO("Product with id " + product.getId() + " has insufficient stock", HttpStatus.BAD_REQUEST);
+                throw new InsufficientStockException(errorDTO);
+            }
+        }
+    }
+
 }

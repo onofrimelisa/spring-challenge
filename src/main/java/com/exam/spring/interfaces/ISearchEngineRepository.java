@@ -1,6 +1,9 @@
 package com.exam.spring.interfaces;
 
 import com.exam.spring.dto.ProductDTO;
+import com.exam.spring.dto.PurchaseDTO;
+import com.exam.spring.exception.InsufficientStockException;
+import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
 
 import java.util.List;
@@ -16,4 +19,6 @@ public interface ISearchEngineRepository {
     List<ProductDTO> filterByFreeShipping(Boolean freeShipping, List<ProductDTO> listToFilter);
     List<ProductDTO> filterByPrestige(Integer prestige, List<ProductDTO> listToFilter);
     List<ProductDTO> orderProducts(List<ProductDTO> productsList, Integer order);
+    void checkStock(List<PurchaseDTO> purchase) throws InsufficientStockException, ProductNotFoundException;
+    ProductDTO getProductById(Integer id) throws ProductNotFoundException;
 }

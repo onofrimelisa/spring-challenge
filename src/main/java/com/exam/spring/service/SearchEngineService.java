@@ -2,6 +2,10 @@ package com.exam.spring.service;
 
 import com.exam.spring.dto.ProductDTO;
 import com.exam.spring.dto.ProductsListResponseDTO;
+import com.exam.spring.dto.PurchaseRequestDTO;
+import com.exam.spring.dto.TicketDTO;
+import com.exam.spring.exception.InsufficientStockException;
+import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.helpers.OrderByName;
 import com.exam.spring.helpers.OrderByPrice;
 import com.exam.spring.interfaces.IOrder;
@@ -40,5 +44,12 @@ public class SearchEngineService implements ISearchEngineService {
         response.setTotal(productsList.size());
 
         return response;
+    }
+
+    @Override
+    public TicketDTO purchaseRequest(PurchaseRequestDTO purchaseRequestDTO) throws InsufficientStockException, ProductNotFoundException {
+        this.searchEngineRepository.checkStock(purchaseRequestDTO.getArticles());
+        System.out.println("bu");
+        return null;
     }
 }
