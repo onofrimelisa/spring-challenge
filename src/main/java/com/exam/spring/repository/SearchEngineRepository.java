@@ -1,5 +1,6 @@
 package com.exam.spring.repository;
 
+import com.exam.spring.dto.BucketInfoDTO;
 import com.exam.spring.dto.StatusCodeDTO;
 import com.exam.spring.dto.ProductDTO;
 import com.exam.spring.dto.PurchaseDTO;
@@ -18,13 +19,13 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
 public class SearchEngineRepository implements ISearchEngineRepository {
     private List<ProductDTO> products;
+    private Map<Integer, BucketInfoDTO> productsPerBucket = new HashMap<>();
 
     public SearchEngineRepository() throws ServerErrorException {
         this.products = loadDatabase();
@@ -155,21 +156,26 @@ public class SearchEngineRepository implements ISearchEngineRepository {
     }
 
     @Override
+    public ProductDTO checkStock(Integer id, Integer quantity) throws InsufficientStockException, ProductNotFoundException {
+        ProductDTO product = getProductById(id);
+        if (product.getStock() < quantity) {
+            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Product with id " + id + " has insufficient stock", HttpStatus.BAD_REQUEST);
+            throw new InsufficientStockException(statusCodeDTO);
+        }
+        return product;
+    }
+
+    @Override
     public void checkStock(List<PurchaseDTO> purchase) throws InsufficientStockException, ProductNotFoundException {
         for (PurchaseDTO purchaseDTO : purchase) {
-            ProductDTO product = getProductById(purchaseDTO.getProductId());
-            if (product.getStock() < purchaseDTO.getQuantity()) {
-                StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Product with id " + product.getId() + " has insufficient stock", HttpStatus.BAD_REQUEST);
-                throw new InsufficientStockException(statusCodeDTO);
-            }
+            checkStock(purchaseDTO.getProductId(), purchaseDTO.getQuantity());
         }
     }
 
     @Override
     public void updateStock(ProductDTO product, Integer quantity) {
         Integer index = 0;
-        for (ProductDTO productDTO :
-                products) {
+        for (ProductDTO productDTO : products) {
             if (productDTO.getId().equals(product.getId())) break;
             index++;
         }
@@ -178,15 +184,50 @@ public class SearchEngineRepository implements ISearchEngineRepository {
     }
 
     @Override
+    public Double buyProduct(ProductDTO product, Integer quantity) {
+        updateStock(product, quantity);
+        return (quantity * product.getPrice());
+    }
+
+    @Override
     public Double buyProducts(List<PurchaseDTO> products) throws ProductNotFoundException {
         Double total = 0d;
         for (PurchaseDTO purchaseDTO : products) {
             ProductDTO product = getProductById(purchaseDTO.getProductId());
-            updateStock(product, purchaseDTO.getQuantity());
-            total += purchaseDTO.getQuantity() * product.getPrice();
+            total += buyProduct(product, purchaseDTO.getQuantity());
         }
 
         return total;
+    }
+
+    @Override
+    public Boolean existBucket(Integer id) {
+        return !(this.productsPerBucket.get(id) == null);
+    }
+
+    @Override
+    public void createBucket(Integer id) {
+        BucketInfoDTO bucketInfo = new BucketInfoDTO();
+        bucketInfo.setArticles(new ArrayList<>());
+        bucketInfo.setTotal(0d);
+        this.productsPerBucket.put(id, bucketInfo);
+    }
+
+    @Override
+    public BucketInfoDTO addToBucket(Integer bucketId, Integer productId) throws InsufficientStockException, ProductNotFoundException {
+        ProductDTO product = checkStock(productId, 1);
+
+        BucketInfoDTO bucketInfo = this.productsPerBucket.get(bucketId);
+        List<ProductDTO> productsList = bucketInfo.getArticles();
+        Double updatedTotal = bucketInfo.getTotal() + buyProduct(product, 1);
+        productsList.add(product);
+
+        bucketInfo.setArticles(productsList);
+        bucketInfo.setTotal(updatedTotal);
+
+        productsPerBucket.put(bucketId, bucketInfo);
+
+        return bucketInfo;
     }
 
 }

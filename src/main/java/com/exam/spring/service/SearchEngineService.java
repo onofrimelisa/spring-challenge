@@ -60,4 +60,16 @@ public class SearchEngineService implements ISearchEngineService {
 
         return ticket;
     }
+
+    @Override
+    public BucketResponseDTO addToBucket(Integer productId, Integer bucketId) throws InsufficientStockException, ProductNotFoundException {
+        if(!this.searchEngineRepository.existBucket(bucketId)) this.searchEngineRepository.createBucket(bucketId);
+        BucketInfoDTO bucketInfo = this.searchEngineRepository.addToBucket(bucketId, productId);
+
+        BucketResponseDTO bucketResponseDTO = new BucketResponseDTO();
+        bucketResponseDTO.setBucketInfo(bucketInfo);
+        bucketResponseDTO.setId(bucketId);
+
+        return bucketResponseDTO;
+    }
 }

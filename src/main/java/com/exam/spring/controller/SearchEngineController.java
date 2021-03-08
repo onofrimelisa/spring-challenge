@@ -1,9 +1,6 @@
 package com.exam.spring.controller;
 
-import com.exam.spring.dto.StatusCodeDTO;
-import com.exam.spring.dto.ProductsListResponseDTO;
-import com.exam.spring.dto.PurchaseRequestDTO;
-import com.exam.spring.dto.TicketDTO;
+import com.exam.spring.dto.*;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.SearchEngineException;
@@ -44,6 +41,11 @@ public class SearchEngineController {
     @PostMapping("/purchase-request")
     public TicketDTO purchaseRequest(@RequestBody PurchaseRequestDTO purchaseRequestDTO) throws InsufficientStockException, ProductNotFoundException {
         return this.searchEngineService.purchaseRequest(purchaseRequestDTO);
+    }
+
+    @PostMapping("/purchase-bucket/{bucketId}")
+    public BucketResponseDTO addToBucket(@RequestBody PurchaseDTO purchaseDTO, @PathVariable Integer bucketId) throws InsufficientStockException, ProductNotFoundException {
+        return this.searchEngineService.addToBucket(purchaseDTO.getProductId(), bucketId);
     }
 
     @ExceptionHandler(SearchEngineException.class)
