@@ -1,16 +1,16 @@
 package com.exam.spring.exception;
 
-import com.exam.spring.dto.ErrorDTO;
+import com.exam.spring.dto.StatusCodeDTO;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public abstract class SearchEngineException extends Exception{
-    private ErrorDTO errorDTO;
+    private StatusCodeDTO statusCodeDTO;
 
-    public SearchEngineException(ErrorDTO errorDTO) {
-        super(errorDTO.getMessage());
-        this.errorDTO = errorDTO;
+    public SearchEngineException(StatusCodeDTO statusCodeDTO) {
+        super(statusCodeDTO.getMessage());
+        this.statusCodeDTO = statusCodeDTO;
     }
 }

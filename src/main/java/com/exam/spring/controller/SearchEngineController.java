@@ -1,6 +1,6 @@
 package com.exam.spring.controller;
 
-import com.exam.spring.dto.ErrorDTO;
+import com.exam.spring.dto.StatusCodeDTO;
 import com.exam.spring.dto.ProductsListResponseDTO;
 import com.exam.spring.dto.PurchaseRequestDTO;
 import com.exam.spring.dto.TicketDTO;
@@ -47,8 +47,7 @@ public class SearchEngineController {
     }
 
     @ExceptionHandler(SearchEngineException.class)
-    public ResponseEntity<ErrorDTO> handleSearchEngineException(SearchEngineException searchEngineException) {
-        System.out.println(searchEngineException.getErrorDTO().getStatus());
-        return new ResponseEntity<>(searchEngineException.getErrorDTO(), searchEngineException.getErrorDTO().getStatus());
+    public ResponseEntity<StatusCodeDTO> handleSearchEngineException(SearchEngineException searchEngineException) {
+        return new ResponseEntity<>(searchEngineException.getStatusCodeDTO(), searchEngineException.getStatusCodeDTO().getStatus());
     }
 }

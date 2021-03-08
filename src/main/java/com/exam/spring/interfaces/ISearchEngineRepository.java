@@ -21,4 +21,6 @@ public interface ISearchEngineRepository {
     List<ProductDTO> orderProducts(List<ProductDTO> productsList, Integer order);
     void checkStock(List<PurchaseDTO> purchase) throws InsufficientStockException, ProductNotFoundException;
     ProductDTO getProductById(Integer id) throws ProductNotFoundException;
+    Double buyProducts(List<PurchaseDTO> products) throws ProductNotFoundException;
+    void updateStock(ProductDTO product, Integer quantity);
 }

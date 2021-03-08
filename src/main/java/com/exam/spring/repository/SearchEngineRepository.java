@@ -1,6 +1,6 @@
 package com.exam.spring.repository;
 
-import com.exam.spring.dto.ErrorDTO;
+import com.exam.spring.dto.StatusCodeDTO;
 import com.exam.spring.dto.ProductDTO;
 import com.exam.spring.dto.PurchaseDTO;
 import com.exam.spring.exception.InsufficientStockException;
@@ -37,8 +37,8 @@ public class SearchEngineRepository implements ISearchEngineRepository {
         try{
             file = ResourceUtils.getFile("classpath:products.json");
         }catch (FileNotFoundException e){
-            ErrorDTO errorDTO = new ErrorDTO("Cannot establish connection with the server", HttpStatus.INTERNAL_SERVER_ERROR);
-            throw new ServerErrorException(errorDTO);
+            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Cannot establish connection with the server", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ServerErrorException(statusCodeDTO);
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -48,8 +48,8 @@ public class SearchEngineRepository implements ISearchEngineRepository {
         try{
             productsList = objectMapper.readValue(file, typeRef);
         }catch (Exception e) {
-            ErrorDTO errorDTO = new ErrorDTO("Cannot establish connection with the server", HttpStatus.INTERNAL_SERVER_ERROR);
-            throw new ServerErrorException(errorDTO);
+            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Cannot establish connection with the server", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ServerErrorException(statusCodeDTO);
         }
 
         return productsList;
@@ -148,8 +148,8 @@ public class SearchEngineRepository implements ISearchEngineRepository {
     public ProductDTO getProductById(Integer id) throws ProductNotFoundException {
         Optional<ProductDTO> product = this.products.stream().filter(productDTO -> productDTO.getId().equals(id)).findFirst();
         if (product.isEmpty()) {
-            ErrorDTO errorDTO = new ErrorDTO("Product with id " + id + " not found", HttpStatus.NOT_FOUND);
-            throw new ProductNotFoundException(errorDTO);
+            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Product with id " + id + " not found", HttpStatus.NOT_FOUND);
+            throw new ProductNotFoundException(statusCodeDTO);
         }
         return product.get();
     }
@@ -157,12 +157,36 @@ public class SearchEngineRepository implements ISearchEngineRepository {
     @Override
     public void checkStock(List<PurchaseDTO> purchase) throws InsufficientStockException, ProductNotFoundException {
         for (PurchaseDTO purchaseDTO : purchase) {
-            ProductDTO product = this.getProductById(purchaseDTO.getProductId());
+            ProductDTO product = getProductById(purchaseDTO.getProductId());
             if (product.getStock() < purchaseDTO.getQuantity()) {
-                ErrorDTO errorDTO = new ErrorDTO("Product with id " + product.getId() + " has insufficient stock", HttpStatus.BAD_REQUEST);
-                throw new InsufficientStockException(errorDTO);
+                StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Product with id " + product.getId() + " has insufficient stock", HttpStatus.BAD_REQUEST);
+                throw new InsufficientStockException(statusCodeDTO);
             }
         }
+    }
+
+    @Override
+    public void updateStock(ProductDTO product, Integer quantity) {
+        Integer index = 0;
+        for (ProductDTO productDTO :
+                products) {
+            if (productDTO.getId().equals(product.getId())) break;
+            index++;
+        }
+
+        products.get(index).setStock(product.getStock() - quantity);
+    }
+
+    @Override
+    public Double buyProducts(List<PurchaseDTO> products) throws ProductNotFoundException {
+        Double total = 0d;
+        for (PurchaseDTO purchaseDTO : products) {
+            ProductDTO product = getProductById(purchaseDTO.getProductId());
+            updateStock(product, purchaseDTO.getQuantity());
+            total += purchaseDTO.getQuantity() * product.getPrice();
+        }
+
+        return total;
     }
 
 }

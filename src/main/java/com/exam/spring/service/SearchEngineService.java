@@ -1,9 +1,6 @@
 package com.exam.spring.service;
 
-import com.exam.spring.dto.ProductDTO;
-import com.exam.spring.dto.ProductsListResponseDTO;
-import com.exam.spring.dto.PurchaseRequestDTO;
-import com.exam.spring.dto.TicketDTO;
+import com.exam.spring.dto.*;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.helpers.OrderByName;
@@ -12,6 +9,7 @@ import com.exam.spring.interfaces.IOrder;
 import com.exam.spring.interfaces.ISearchEngineRepository;
 import com.exam.spring.interfaces.ISearchEngineService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,8 +46,18 @@ public class SearchEngineService implements ISearchEngineService {
 
     @Override
     public TicketDTO purchaseRequest(PurchaseRequestDTO purchaseRequestDTO) throws InsufficientStockException, ProductNotFoundException {
-        this.searchEngineRepository.checkStock(purchaseRequestDTO.getArticles());
-        System.out.println("bu");
-        return null;
+        List<PurchaseDTO> articles = purchaseRequestDTO.getArticles();
+
+        this.searchEngineRepository.checkStock(articles);
+
+        TicketInfoDTO ticketInfoDTO = new TicketInfoDTO();
+        ticketInfoDTO.setArticles(articles);
+        ticketInfoDTO.setTotal(this.searchEngineRepository.buyProducts(articles));
+
+        TicketDTO ticket = new TicketDTO();
+        ticket.setTicket(ticketInfoDTO);
+        ticket.setStatusCode(new StatusCodeDTO("The purchase was done successfully", HttpStatus.OK));
+
+        return ticket;
     }
 }

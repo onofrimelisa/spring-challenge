@@ -1,9 +1,9 @@
 package com.exam.spring.exception;
 
-import com.exam.spring.dto.ErrorDTO;
+import com.exam.spring.dto.StatusCodeDTO;
 
 public class ProductNotFoundException extends SearchEngineException{
-    public ProductNotFoundException(ErrorDTO errorDTO) {
-        super(errorDTO);
+    public ProductNotFoundException(StatusCodeDTO statusCodeDTO) {
+        super(statusCodeDTO);
     }
 }

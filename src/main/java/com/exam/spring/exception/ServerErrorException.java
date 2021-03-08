@@ -1,9 +1,9 @@
 package com.exam.spring.exception;
 
-import com.exam.spring.dto.ErrorDTO;
+import com.exam.spring.dto.StatusCodeDTO;
 
 public class ServerErrorException extends SearchEngineException{
-    public ServerErrorException(ErrorDTO errorDTO) {
-        super(errorDTO);
+    public ServerErrorException(StatusCodeDTO statusCodeDTO) {
+        super(statusCodeDTO);
     }
 }
