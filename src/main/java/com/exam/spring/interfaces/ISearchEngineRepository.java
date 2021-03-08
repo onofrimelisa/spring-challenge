@@ -1,6 +1,6 @@
 package com.exam.spring.interfaces;
 
-import com.exam.spring.dto.BucketInfoDTO;
+import com.exam.spring.dto.BucketResponseDTO;
 import com.exam.spring.dto.ProductDTO;
 import com.exam.spring.dto.PurchaseDTO;
 import com.exam.spring.exception.InsufficientStockException;
@@ -8,6 +8,7 @@ import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ISearchEngineRepository {
     List<ProductDTO> loadDatabase() throws ServerErrorException;
@@ -21,12 +22,13 @@ public interface ISearchEngineRepository {
     List<ProductDTO> filterByPrestige(Integer prestige, List<ProductDTO> listToFilter);
     List<ProductDTO> orderProducts(List<ProductDTO> productsList, Integer order);
     void checkStock(List<PurchaseDTO> purchase) throws InsufficientStockException, ProductNotFoundException;
-    ProductDTO checkStock(Integer id, Integer quantity) throws InsufficientStockException, ProductNotFoundException;
+    void checkStock(ProductDTO product, Integer quantity) throws InsufficientStockException, ProductNotFoundException;
     ProductDTO getProductById(Integer id) throws ProductNotFoundException;
     Double buyProducts(List<PurchaseDTO> products) throws ProductNotFoundException;
     Double buyProduct(ProductDTO product, Integer quantity);
     void updateStock(ProductDTO product, Integer quantity);
-    Boolean existBucket(Integer id);
-    void createBucket(Integer id);
-    BucketInfoDTO addToBucket(Integer bucketID, Integer productId) throws InsufficientStockException, ProductNotFoundException;
+    Optional<BucketResponseDTO> getBucket(Integer bucketId);
+    BucketResponseDTO createBucket(Integer id);
+    BucketResponseDTO addToBucket(BucketResponseDTO bucket, Integer productId, Integer quantity) throws InsufficientStockException, ProductNotFoundException;
+    void updateBucketValues(BucketResponseDTO bucket, ProductDTO product, Integer quantity);
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class SearchEngineService implements ISearchEngineService {
@@ -62,14 +63,11 @@ public class SearchEngineService implements ISearchEngineService {
     }
 
     @Override
-    public BucketResponseDTO addToBucket(Integer productId, Integer bucketId) throws InsufficientStockException, ProductNotFoundException {
-        if(!this.searchEngineRepository.existBucket(bucketId)) this.searchEngineRepository.createBucket(bucketId);
-        BucketInfoDTO bucketInfo = this.searchEngineRepository.addToBucket(bucketId, productId);
+    public BucketResponseDTO addToBucket(PurchaseDTO purchaseDTO, Integer bucketId) throws InsufficientStockException, ProductNotFoundException {
+        Optional<BucketResponseDTO> bucket = this.searchEngineRepository.getBucket(bucketId);
 
-        BucketResponseDTO bucketResponseDTO = new BucketResponseDTO();
-        bucketResponseDTO.setBucketInfo(bucketInfo);
-        bucketResponseDTO.setId(bucketId);
+        if(bucket.isEmpty()) bucket = Optional.of(this.searchEngineRepository.createBucket(bucketId));
 
-        return bucketResponseDTO;
+        return this.searchEngineRepository.addToBucket(bucket.get(), purchaseDTO.getProductId(), purchaseDTO.getQuantity());
     }
 }

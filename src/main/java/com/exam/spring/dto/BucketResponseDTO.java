@@ -4,10 +4,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 public class BucketResponseDTO {
     private Integer id;
-    private BucketInfoDTO bucketInfo;
+    private List<PurchaseDTO> articles;
+    private Double total;
 }

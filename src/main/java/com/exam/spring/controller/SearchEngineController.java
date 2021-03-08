@@ -45,7 +45,7 @@ public class SearchEngineController {
 
     @PostMapping("/purchase-bucket/{bucketId}")
     public BucketResponseDTO addToBucket(@RequestBody PurchaseDTO purchaseDTO, @PathVariable Integer bucketId) throws InsufficientStockException, ProductNotFoundException {
-        return this.searchEngineService.addToBucket(purchaseDTO.getProductId(), bucketId);
+        return this.searchEngineService.addToBucket(purchaseDTO, bucketId);
     }
 
     @ExceptionHandler(SearchEngineException.class)
