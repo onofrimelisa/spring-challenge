@@ -13,4 +13,5 @@ public class BucketResponseDTO {
     private Integer id;
     private List<PurchaseDTO> articles;
     private Double total;
+    private StatusCodeDTO statusCodeDTO;
 }

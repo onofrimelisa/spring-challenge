@@ -1,6 +1,7 @@
 package com.exam.spring.repository;
 
 import com.exam.spring.dto.*;
+import com.exam.spring.exception.BucketNotFoundException;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
@@ -212,12 +213,15 @@ public class SearchEngineRepository implements ISearchEngineRepository {
     }
 
     @Override
-    public void updateBucketValues(BucketResponseDTO bucket, ProductDTO product, Integer quantity) {
+    public void updateBucketValues(BucketResponseDTO bucket, ProductDTO product, Integer quantity) throws InsufficientStockException, ProductNotFoundException {
         Optional<PurchaseDTO> purchaseDTO = bucket.getArticles().stream().filter(purchase -> purchase.getProductId().equals(product.getId())).findFirst();
 
         if (purchaseDTO.isPresent()){
-            purchaseDTO.get().setQuantity(purchaseDTO.get().getQuantity() + quantity);
+            Integer updatedQuantity = purchaseDTO.get().getQuantity() + quantity;
+            checkStock(product, updatedQuantity);
+            purchaseDTO.get().setQuantity(updatedQuantity);
         }else{
+            checkStock(product, quantity);
             PurchaseDTO purchase = new PurchaseDTO();
             purchase.setBrand(product.getBrand());
             purchase.setProductId(product.getId());
@@ -226,13 +230,24 @@ public class SearchEngineRepository implements ISearchEngineRepository {
             bucket.getArticles().add(purchase);
         }
 
-        bucket.setTotal(bucket.getTotal() + buyProduct(product, quantity));
+        bucket.setTotal(bucket.getTotal() + quantity * product.getPrice());
+    }
+
+    @Override
+    public BucketResponseDTO purchaseBucket(Integer bucketId) throws BucketNotFoundException, ProductNotFoundException {
+        Optional<BucketResponseDTO> bucket = getBucket(bucketId);
+        if (bucket.isEmpty()) {
+            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Bucket with id " + bucketId + " was not found", HttpStatus.NOT_FOUND);
+            throw new BucketNotFoundException(statusCodeDTO);
+        }
+        buyProducts(bucket.get().getArticles());
+        this.buckets.remove(bucket.get());
+        return bucket.get();
     }
 
     @Override
     public BucketResponseDTO addToBucket(BucketResponseDTO bucket, Integer productId, Integer quantity) throws InsufficientStockException, ProductNotFoundException {
         ProductDTO product = getProductById(productId);
-        checkStock(product, quantity);
         updateBucketValues(bucket, product, quantity);
         return bucket;
     }

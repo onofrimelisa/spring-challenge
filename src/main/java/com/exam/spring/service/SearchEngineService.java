@@ -1,11 +1,9 @@
 package com.exam.spring.service;
 
 import com.exam.spring.dto.*;
+import com.exam.spring.exception.BucketNotFoundException;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
-import com.exam.spring.helpers.OrderByName;
-import com.exam.spring.helpers.OrderByPrice;
-import com.exam.spring.interfaces.IOrder;
 import com.exam.spring.interfaces.ISearchEngineRepository;
 import com.exam.spring.interfaces.ISearchEngineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +66,17 @@ public class SearchEngineService implements ISearchEngineService {
 
         if(bucket.isEmpty()) bucket = Optional.of(this.searchEngineRepository.createBucket(bucketId));
 
-        return this.searchEngineRepository.addToBucket(bucket.get(), purchaseDTO.getProductId(), purchaseDTO.getQuantity());
+        BucketResponseDTO response = this.searchEngineRepository.addToBucket(bucket.get(), purchaseDTO.getProductId(), purchaseDTO.getQuantity());
+        response.setStatusCodeDTO(new StatusCodeDTO("Product added to the bucket successfully", HttpStatus.OK));
+
+        return response;
+    }
+
+    @Override
+    public BucketResponseDTO purchaseBucket(Integer bucketId) throws ProductNotFoundException, BucketNotFoundException {
+        BucketResponseDTO response = this.searchEngineRepository.purchaseBucket(bucketId);
+        response.setStatusCodeDTO(new StatusCodeDTO("Products of bucket " + bucketId + " purchased successfully", HttpStatus.OK));
+
+        return response;
     }
 }
