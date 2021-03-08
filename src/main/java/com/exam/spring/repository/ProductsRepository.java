@@ -1,14 +1,13 @@
 package com.exam.spring.repository;
 
 import com.exam.spring.dto.*;
-import com.exam.spring.exception.BucketNotFoundException;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
 import com.exam.spring.helpers.OrderByName;
 import com.exam.spring.helpers.OrderByPrice;
 import com.exam.spring.interfaces.IOrder;
-import com.exam.spring.interfaces.ISearchEngineRepository;
+import com.exam.spring.interfaces.IProductsRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
@@ -21,11 +20,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
-public class SearchEngineRepository implements ISearchEngineRepository {
+public class ProductsRepository implements IProductsRepository {
     private List<ProductDTO> products;
-    private List<BucketResponseDTO> buckets = new ArrayList<>();
 
-    public SearchEngineRepository() throws ServerErrorException {
+    public ProductsRepository() throws ServerErrorException {
         this.products = loadDatabase();
     }
 
@@ -195,61 +193,6 @@ public class SearchEngineRepository implements ISearchEngineRepository {
         }
 
         return total;
-    }
-
-    @Override
-    public BucketResponseDTO createBucket(Integer bucketId) {
-        BucketResponseDTO bucket = new BucketResponseDTO();
-        bucket.setArticles(new ArrayList<>());
-        bucket.setTotal(0d);
-        bucket.setId(bucketId);
-        this.buckets.add(bucket);
-        return bucket;
-    }
-
-    @Override
-    public Optional<BucketResponseDTO> getBucket(Integer bucketId){
-        return this.buckets.stream().filter(bucket -> bucket.getId().equals(bucketId)).findFirst();
-    }
-
-    @Override
-    public void updateBucketValues(BucketResponseDTO bucket, ProductDTO product, Integer quantity) throws InsufficientStockException, ProductNotFoundException {
-        Optional<PurchaseDTO> purchaseDTO = bucket.getArticles().stream().filter(purchase -> purchase.getProductId().equals(product.getId())).findFirst();
-
-        if (purchaseDTO.isPresent()){
-            Integer updatedQuantity = purchaseDTO.get().getQuantity() + quantity;
-            checkStock(product, updatedQuantity);
-            purchaseDTO.get().setQuantity(updatedQuantity);
-        }else{
-            checkStock(product, quantity);
-            PurchaseDTO purchase = new PurchaseDTO();
-            purchase.setBrand(product.getBrand());
-            purchase.setProductId(product.getId());
-            purchase.setQuantity(quantity);
-            purchase.setName(product.getName());
-            bucket.getArticles().add(purchase);
-        }
-
-        bucket.setTotal(bucket.getTotal() + quantity * product.getPrice());
-    }
-
-    @Override
-    public BucketResponseDTO purchaseBucket(Integer bucketId) throws BucketNotFoundException, ProductNotFoundException {
-        Optional<BucketResponseDTO> bucket = getBucket(bucketId);
-        if (bucket.isEmpty()) {
-            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Bucket with id " + bucketId + " was not found", HttpStatus.NOT_FOUND);
-            throw new BucketNotFoundException(statusCodeDTO);
-        }
-        buyProducts(bucket.get().getArticles());
-        this.buckets.remove(bucket.get());
-        return bucket.get();
-    }
-
-    @Override
-    public BucketResponseDTO addToBucket(BucketResponseDTO bucket, Integer productId, Integer quantity) throws InsufficientStockException, ProductNotFoundException {
-        ProductDTO product = getProductById(productId);
-        updateBucketValues(bucket, product, quantity);
-        return bucket;
     }
 
 }

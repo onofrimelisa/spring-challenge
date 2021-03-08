@@ -3,15 +3,13 @@ package com.exam.spring.interfaces;
 import com.exam.spring.dto.BucketResponseDTO;
 import com.exam.spring.dto.ProductDTO;
 import com.exam.spring.dto.PurchaseDTO;
-import com.exam.spring.exception.BucketNotFoundException;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface ISearchEngineRepository {
+public interface IProductsRepository {
     List<ProductDTO> loadDatabase() throws ServerErrorException;
     List<ProductDTO> getProducts();
     List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO>motherList, Integer order);
@@ -28,9 +26,4 @@ public interface ISearchEngineRepository {
     Double buyProducts(List<PurchaseDTO> products) throws ProductNotFoundException;
     Double buyProduct(ProductDTO product, Integer quantity);
     void updateStock(ProductDTO product, Integer quantity);
-    Optional<BucketResponseDTO> getBucket(Integer bucketId);
-    BucketResponseDTO createBucket(Integer id);
-    BucketResponseDTO addToBucket(BucketResponseDTO bucket, Integer productId, Integer quantity) throws InsufficientStockException, ProductNotFoundException;
-    void updateBucketValues(BucketResponseDTO bucket, ProductDTO product, Integer quantity) throws InsufficientStockException, ProductNotFoundException;
-    BucketResponseDTO purchaseBucket(Integer bucketId) throws BucketNotFoundException, ProductNotFoundException;
 }

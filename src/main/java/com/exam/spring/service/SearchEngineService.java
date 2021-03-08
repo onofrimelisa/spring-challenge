@@ -4,7 +4,8 @@ import com.exam.spring.dto.*;
 import com.exam.spring.exception.BucketNotFoundException;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
-import com.exam.spring.interfaces.ISearchEngineRepository;
+import com.exam.spring.interfaces.IBucketsRepository;
+import com.exam.spring.interfaces.IProductsRepository;
 import com.exam.spring.interfaces.ISearchEngineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,11 +18,13 @@ import java.util.Optional;
 @Service
 public class SearchEngineService implements ISearchEngineService {
     @Autowired
-    private ISearchEngineRepository searchEngineRepository;
+    private IProductsRepository productsRepository;
+    @Autowired
+    private IBucketsRepository bucketsRepository;
 
     @Override
     public ProductsListResponseDTO getProducts() {
-        List<ProductDTO> products = this.searchEngineRepository.getProducts();
+        List<ProductDTO> products = this.productsRepository.getProducts();
         ProductsListResponseDTO response = new ProductsListResponseDTO();
         response.setArticles(products);
         response.setTotal(products.size());
@@ -34,7 +37,7 @@ public class SearchEngineService implements ISearchEngineService {
         ProductsListResponseDTO response = new ProductsListResponseDTO();
 
         for (Map.Entry<String, String> filter : filters.entrySet()) {
-            productsList = this.searchEngineRepository.getProductsWithFilter(filter.getKey(), filter.getValue(), productsList, order);
+            productsList = this.productsRepository.getProductsWithFilter(filter.getKey(), filter.getValue(), productsList, order);
         }
 
         response.setArticles(productsList);
@@ -47,11 +50,11 @@ public class SearchEngineService implements ISearchEngineService {
     public TicketDTO purchaseRequest(PurchaseRequestDTO purchaseRequestDTO) throws InsufficientStockException, ProductNotFoundException {
         List<PurchaseDTO> articles = purchaseRequestDTO.getArticles();
 
-        this.searchEngineRepository.checkStock(articles);
+        this.productsRepository.checkStock(articles);
 
         TicketInfoDTO ticketInfoDTO = new TicketInfoDTO();
         ticketInfoDTO.setArticles(articles);
-        ticketInfoDTO.setTotal(this.searchEngineRepository.buyProducts(articles));
+        ticketInfoDTO.setTotal(this.productsRepository.buyProducts(articles));
 
         TicketDTO ticket = new TicketDTO();
         ticket.setTicket(ticketInfoDTO);
@@ -62,11 +65,11 @@ public class SearchEngineService implements ISearchEngineService {
 
     @Override
     public BucketResponseDTO addToBucket(PurchaseDTO purchaseDTO, Integer bucketId) throws InsufficientStockException, ProductNotFoundException {
-        Optional<BucketResponseDTO> bucket = this.searchEngineRepository.getBucket(bucketId);
+        Optional<BucketResponseDTO> bucket = this.bucketsRepository.getBucket(bucketId);
 
-        if(bucket.isEmpty()) bucket = Optional.of(this.searchEngineRepository.createBucket(bucketId));
+        if(bucket.isEmpty()) bucket = Optional.of(this.bucketsRepository.createBucket(bucketId));
 
-        BucketResponseDTO response = this.searchEngineRepository.addToBucket(bucket.get(), purchaseDTO.getProductId(), purchaseDTO.getQuantity());
+        BucketResponseDTO response = this.bucketsRepository.addToBucket(bucket.get(), purchaseDTO.getProductId(), purchaseDTO.getQuantity());
         response.setStatusCodeDTO(new StatusCodeDTO("Product added to the bucket successfully", HttpStatus.OK));
 
         return response;
@@ -74,7 +77,7 @@ public class SearchEngineService implements ISearchEngineService {
 
     @Override
     public BucketResponseDTO purchaseBucket(Integer bucketId) throws ProductNotFoundException, BucketNotFoundException {
-        BucketResponseDTO response = this.searchEngineRepository.purchaseBucket(bucketId);
+        BucketResponseDTO response = this.bucketsRepository.purchaseBucket(bucketId);
         response.setStatusCodeDTO(new StatusCodeDTO("Products of bucket " + bucketId + " purchased successfully", HttpStatus.OK));
 
         return response;
