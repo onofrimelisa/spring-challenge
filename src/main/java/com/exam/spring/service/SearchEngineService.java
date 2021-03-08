@@ -2,7 +2,8 @@ package com.exam.spring.service;
 
 import com.exam.spring.dto.ProductDTO;
 import com.exam.spring.dto.ProductsListResponseDTO;
-import com.exam.spring.helpers.OrderAlphabetically;
+import com.exam.spring.helpers.OrderByName;
+import com.exam.spring.helpers.OrderByPrice;
 import com.exam.spring.interfaces.IOrder;
 import com.exam.spring.interfaces.ISearchEngineRepository;
 import com.exam.spring.interfaces.ISearchEngineService;
@@ -28,25 +29,24 @@ public class SearchEngineService implements ISearchEngineService {
 
     @Override
     public List<ProductDTO> orderProducts(List<ProductDTO> productsList, Integer order) {
-        List<ProductDTO> orderedList = null;
         IOrder orderMethod;
 
        switch (order){
             case 0:
-                orderMethod = new OrderAlphabetically();
-                orderedList = orderMethod.orderAsc(productsList);
+                orderMethod = new OrderByName(true);
                 break;
             case 1:
-                orderMethod = new OrderAlphabetically();
-                orderedList = orderMethod.orderDesc(productsList);
+                orderMethod = new OrderByName(false);
                 break;
             case 2:
+                orderMethod = new OrderByPrice(false);
                 break;
             default:
+                orderMethod = new OrderByPrice(true);
                 break;
         }
 
-        return orderedList;
+        return orderMethod.orderList(productsList);
     }
 
     @Override

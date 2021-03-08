@@ -87,9 +87,6 @@ public class SearchEngineRepository implements ISearchEngineRepository {
     public List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO> motherList) {
         switch(filterKey)
         {
-            case "price":
-                motherList = this.filterByPrice(Double.valueOf(filterValue), motherList);
-                break;
             case "name":
                 motherList = this.filterByName(filterValue, motherList);
                 break;
@@ -98,6 +95,9 @@ public class SearchEngineRepository implements ISearchEngineRepository {
                 break;
             case "brand":
                 motherList = this.filterByBrand(filterValue, motherList);
+                break;
+            case "price":
+                motherList = this.filterByPrice(Double.valueOf(filterValue), motherList);
                 break;
             case "prestige":
                 motherList = this.filterByPrestige(Integer.valueOf(filterValue), motherList);
