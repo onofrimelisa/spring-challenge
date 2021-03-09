@@ -4,6 +4,7 @@ import com.exam.spring.dto.*;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
+import com.exam.spring.helpers.FilterUtils;
 import com.exam.spring.helpers.OrderByName;
 import com.exam.spring.helpers.OrderByPrice;
 import com.exam.spring.helpers.StatusCode;
@@ -18,6 +19,7 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
@@ -86,30 +88,37 @@ public class ProductsRepository implements IProductsRepository {
     }
 
     @Override
-    public List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO> motherList) {
-        switch(filterKey)
-        {
-            case "name":
-                motherList = this.filterByName(filterValue, motherList);
-                break;
-            case "category":
-                motherList = this.filterByCategory(filterValue, motherList);
-                break;
-            case "brand":
-                motherList = this.filterByBrand(filterValue, motherList);
-                break;
-            case "price":
-                motherList = this.filterByPrice(Double.valueOf(filterValue), motherList);
-                break;
-            case "prestige":
-                motherList = this.filterByPrestige(Integer.valueOf(filterValue), motherList);
-                break;
-            case "freeShipping":
-                motherList = this.filterByFreeShipping(Boolean.valueOf(filterValue), motherList);
-                break;
+    public List<ProductDTO> getProductsWithFilter(Map<String, String> filters, List<ProductDTO> productList) {
+        List<Predicate<ProductDTO>> allPredicates = new ArrayList<>();
+
+        for (Map.Entry<String, String> filter : filters.entrySet()) {
+            switch(filter.getKey())
+            {
+                case "name":
+                    allPredicates.add(FilterUtils.filterProductsByName(filter.getValue()));
+                    break;
+                case "category":
+                    allPredicates.add(FilterUtils.filterProductsByCategory(filter.getValue()));
+                    break;
+                case "brand":
+                    allPredicates.add(FilterUtils.filterProductsByBrand(filter.getValue()));
+                    break;
+                case "price":
+                    allPredicates.add(FilterUtils.filterProductsByPrice(Double.valueOf(filter.getValue())));
+                    break;
+                case "prestige":
+                    allPredicates.add(FilterUtils.filterProductsByPrestige(Integer.valueOf(filter.getValue())));
+                    break;
+                case "freeShipping":
+                    allPredicates.add(FilterUtils.filterProductsByFreeShipping(Boolean.valueOf(filter.getValue())));
+                    break;
+            }
         }
 
-        return motherList;
+        return productList
+            .stream()
+            .filter(allPredicates.stream().reduce(x->true, Predicate::and))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -161,36 +170,4 @@ public class ProductsRepository implements IProductsRepository {
 
         return total;
     }
-
-    /* #######################################################################################################
-
-                                            HELPERS
-
-     ######################################################################################################### */
-
-    private List<ProductDTO> filterByCategory(String category, List<ProductDTO> listToFilter){
-        return listToFilter.stream().filter(product -> product.getCategory().equalsIgnoreCase(category)).collect(Collectors.toList());
-    }
-
-    private List<ProductDTO> filterByName(String name, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
-    }
-
-    private List<ProductDTO> filterByBrand(String brand, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getBrand().equalsIgnoreCase(brand)).collect(Collectors.toList());
-    }
-
-    private List<ProductDTO> filterByPrice(Double price, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getPrice().compareTo(price) == 0).collect(Collectors.toList());
-    }
-
-    private List<ProductDTO> filterByFreeShipping(Boolean freeShipping, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getFreeShipping().equals(freeShipping)).collect(Collectors.toList());
-    }
-
-    private List<ProductDTO> filterByPrestige(Integer prestige, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getPrestige().compareTo(prestige) == 0).collect(Collectors.toList());
-    }
-
-
 }

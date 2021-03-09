@@ -2,10 +2,12 @@ package com.exam.spring.repository;
 
 import com.exam.spring.dto.CustomerDTO;
 import com.exam.spring.dto.CustomerRequestDTO;
+import com.exam.spring.helpers.FilterUtils;
 import com.exam.spring.interfaces.ICustomersRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
@@ -35,31 +37,24 @@ public class CustomersRepository implements ICustomersRepository {
     }
 
     @Override
-    public List<CustomerDTO> getCustomersWithFilter(String key, String value, List<CustomerDTO> motherList) {
-        switch(key)
-        {
-            case "name":
-                motherList = this.filterByName(value, motherList);
-                break;
-            case "province":
-                motherList = this.filterByProvince(value, motherList);
-                break;
+    public List<CustomerDTO> getCustomersWithFilter(Map<String, String> filters, List<CustomerDTO> customerList) {
+        List<Predicate<CustomerDTO>> allPredicates = new ArrayList<>();
+
+        for (Map.Entry<String, String> filter : filters.entrySet()) {
+            switch(filter.getKey())
+            {
+                case "name":
+                    allPredicates.add(FilterUtils.filterCustomersByName(filter.getValue()));
+                    break;
+                case "province":
+                    allPredicates.add(FilterUtils.filterCustomersByProvince(filter.getValue()));
+                    break;
+            }
         }
 
-        return motherList;
-    }
-
-    /* #######################################################################################################
-
-                                            HELPERS
-
-     ######################################################################################################### */
-
-    private List<CustomerDTO> filterByProvince(String province, List<CustomerDTO> listToFilter){
-        return listToFilter.stream().filter(customer -> customer.getProvince().equalsIgnoreCase(province)).collect(Collectors.toList());
-    }
-
-    private List<CustomerDTO> filterByName(String name, List<CustomerDTO> listToFilter) {
-        return listToFilter.stream().filter(customer -> customer.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
+        return customerList
+            .stream()
+            .filter(allPredicates.stream().reduce(x->true, Predicate::and))
+            .collect(Collectors.toList());
     }
 }

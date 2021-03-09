@@ -29,7 +29,7 @@ public class SearchEngineService implements ISearchEngineService {
         List<ProductDTO> productsList = this.productsRepository.getProducts();
 
         for (Map.Entry<String, String> filter : filters.entrySet()) {
-            productsList = this.productsRepository.getProductsWithFilter(filter.getKey(), filter.getValue(), productsList);
+            productsList = this.productsRepository.getProductsWithFilter(filters, productsList);
         }
 
         this.productsRepository.orderProducts(productsList, order);
@@ -100,9 +100,7 @@ public class SearchEngineService implements ISearchEngineService {
     public ListResponseDTO<CustomerDTO> getCustomers(Map<String, String> filters) {
         List<CustomerDTO> customersList = this.customersRepository.getCustomers();
 
-        for (Map.Entry<String, String> filter : filters.entrySet()) {
-            customersList = this.customersRepository.getCustomersWithFilter(filter.getKey(), filter.getValue(), customersList);
-        }
+        customersList = this.customersRepository.getCustomersWithFilter(filters, customersList);
 
         return createList(customersList);
     }

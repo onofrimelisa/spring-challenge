@@ -7,11 +7,12 @@ import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IProductsRepository {
     List<ProductDTO> loadDatabase() throws ServerErrorException;
     List<ProductDTO> getProducts();
-    List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO>motherList);
+    List<ProductDTO> getProductsWithFilter(Map<String, String> filters, List<ProductDTO> productList);
     void orderProducts(List<ProductDTO> productsList, Integer order);
     void checkStock(ProductDTO product, Integer quantity) throws InsufficientStockException, ProductNotFoundException;
     void checkStock(List<PurchaseDTO> purchase) throws InsufficientStockException, ProductNotFoundException;
