@@ -52,7 +52,7 @@ public class SearchEngineController {
     }
 
     @PostMapping("/customers/new")
-    public CustomerResponseDTO addCustomer(@RequestBody CustomerRequestDTO customer) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
+    public CustomerResponseDTO addCustomer(@RequestBody CustomerRequestDTO customer) throws CustomerAlreadyExistsException, InsufficientCustomerInformationException {
         return this.searchEngineService.addCustomer(customer);
     }
 
