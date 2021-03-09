@@ -83,7 +83,8 @@ public class SearchEngineService implements ISearchEngineService {
     public CustomerDTO addCustomer(CustomerRequestDTO customerRequestDTO) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
         if (missingMandatoryField(customerRequestDTO.getDni()) ||
             missingMandatoryField(customerRequestDTO.getLastname()) ||
-            missingMandatoryField(customerRequestDTO.getName()))
+            missingMandatoryField(customerRequestDTO.getName()) ||
+            missingMandatoryField(customerRequestDTO.getProvince()))
             throw new InsufficientCustomersInformationException(StatusCode.getCustomStatusCode("Some mandatory fields for the customer creation are missing", HttpStatus.BAD_REQUEST));
 
         String dni = customerRequestDTO.getDni();
@@ -95,8 +96,14 @@ public class SearchEngineService implements ISearchEngineService {
     }
 
     @Override
-    public ListResponseDTO<CustomerDTO> getCustomers() {
-        return createList(this.customersRepository.getCustomers());
+    public ListResponseDTO<CustomerDTO> getCustomers(Map<String, String> filters) {
+        List<CustomerDTO> customersList = this.customersRepository.getCustomers();
+
+        for (Map.Entry<String, String> filter : filters.entrySet()) {
+            customersList = this.customersRepository.getCustomersWithFilter(filter.getKey(), filter.getValue(), customersList);
+        }
+
+        return createList(customersList);
     }
 
     /* #######################################################################################################

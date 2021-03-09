@@ -59,7 +59,7 @@ public class ProductsRepository implements IProductsRepository {
     }
 
     @Override
-    public List<ProductDTO> orderProducts(List<ProductDTO> productsList, Integer order) {
+    public void orderProducts(List<ProductDTO> productsList, Integer order) {
         IOrder orderMethod;
 
         if (!(order == null)) {
@@ -83,7 +83,6 @@ public class ProductsRepository implements IProductsRepository {
 
         orderMethod.orderList(productsList);
 
-        return productsList;
     }
 
     @Override

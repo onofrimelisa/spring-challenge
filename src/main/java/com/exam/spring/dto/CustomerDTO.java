@@ -11,6 +11,7 @@ public class CustomerDTO {
     private String dni;
     private String name;
     private String lastname;
+    private String province;
 
     public CustomerDTO() {
         this.customerId = counterCustomerId;

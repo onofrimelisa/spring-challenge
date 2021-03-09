@@ -13,5 +13,5 @@ public interface ISearchEngineService{
     BucketResponseDTO addToBucket(PurchaseDTO purchaseDTO, Integer bucketId) throws InsufficientStockException, ProductNotFoundException;
     BucketResponseDTO purchaseBucket(Integer bucketId) throws ProductNotFoundException, BucketNotFoundException;
     CustomerDTO addCustomer(CustomerRequestDTO customerRequestDTO) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException;
-    ListResponseDTO<CustomerDTO> getCustomers();
+    ListResponseDTO<CustomerDTO> getCustomers(Map<String, String> filters);
 }

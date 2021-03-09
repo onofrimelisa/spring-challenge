@@ -57,8 +57,15 @@ public class SearchEngineController {
     }
 
     @GetMapping("/customers")
-    public ListResponseDTO<CustomerDTO> getCustomers(){
-        return this.searchEngineService.getCustomers();
+    public ListResponseDTO<CustomerDTO> getCustomers(
+        @RequestParam(value = "province", required = false) String province,
+        @RequestParam(value = "name", required = false) String name){
+        Map<String, String> filters = new HashMap<>();
+
+        if (province != null) filters.put("province", province);
+        if (name != null) filters.put("name", name);
+
+        return this.searchEngineService.getCustomers(filters);
     }
 
     @ExceptionHandler(SearchEngineException.class)
