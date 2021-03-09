@@ -243,11 +243,17 @@ Response (ejemplo):
 
 ```sh
 {
-    "customerId": 0,
-    "dni": "41526789",
-    "name": "Melisa",
-    "lastname": "Onofri",
-    "province": "Buenos Aires"
+    "statusCodeDTO": {
+        "message": "Operation performed successfully",
+        "status": "OK"
+    },
+    "customer": {
+       "customerId": 0,
+       "dni": "41526789",
+       "name": "Melisa",
+       "lastname": "Onofri",
+       "province": "Buenos Aires"
+   }
 }
 ```
 

@@ -43,7 +43,7 @@ public class SearchEngineService implements ISearchEngineService {
     }
 
     @Override
-    public TicketDTO purchaseRequest(PurchaseRequestDTO purchaseRequestDTO) throws InsufficientStockException, ProductNotFoundException {
+    public TicketResponseDTO purchaseRequest(PurchaseRequestDTO purchaseRequestDTO) throws InsufficientStockException, ProductNotFoundException {
         List<PurchaseDTO> articles = purchaseRequestDTO.getArticles();
 
         this.productsRepository.checkStock(articles);
@@ -52,9 +52,9 @@ public class SearchEngineService implements ISearchEngineService {
         ticketInfoDTO.setArticles(articles);
         ticketInfoDTO.setTotal(this.productsRepository.buyProducts(articles));
 
-        TicketDTO ticket = new TicketDTO();
+        TicketResponseDTO ticket = new TicketResponseDTO();
         ticket.setTicket(ticketInfoDTO);
-        ticket.setStatusCode(StatusCode.getSuccessfulOperationStatusCode());
+        ticket.setStatusCodeDTO(StatusCode.getSuccessfulOperationStatusCode());
 
         return ticket;
     }
@@ -80,7 +80,7 @@ public class SearchEngineService implements ISearchEngineService {
     }
 
     @Override
-    public CustomerDTO addCustomer(CustomerRequestDTO customerRequestDTO) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
+    public CustomerResponseDTO addCustomer(CustomerRequestDTO customerRequestDTO) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
         if (missingMandatoryField(customerRequestDTO.getDni()) ||
             missingMandatoryField(customerRequestDTO.getLastname()) ||
             missingMandatoryField(customerRequestDTO.getName()) ||
@@ -92,7 +92,13 @@ public class SearchEngineService implements ISearchEngineService {
         if (this.customersRepository.getCustomerByDNI(dni).isPresent())
             throw new CustomerAlreadyExistsException(StatusCode.getCustomStatusCode("The customer with the DNI " + dni + " already exists", HttpStatus.BAD_REQUEST));
 
-        return this.customersRepository.addCustomer(customerRequestDTO);
+        CustomerDTO newCustomer = this.customersRepository.addCustomer(customerRequestDTO);
+
+        CustomerResponseDTO customerResponse = new CustomerResponseDTO();
+        customerResponse.setStatusCodeDTO(StatusCode.getSuccessfulOperationStatusCode());
+        customerResponse.setCustomer(newCustomer);
+
+        return customerResponse;
     }
 
     @Override

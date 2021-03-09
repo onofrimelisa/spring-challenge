@@ -9,9 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BucketResponseDTO {
+public class BucketResponseDTO extends ResponseDTO{
     private Integer id;
     private List<PurchaseDTO> articles;
     private Double total;
-    private StatusCodeDTO statusCodeDTO;
 }

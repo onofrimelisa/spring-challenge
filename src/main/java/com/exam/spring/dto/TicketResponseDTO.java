@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TicketDTO {
+public class TicketResponseDTO extends ResponseDTO{
     private TicketInfoDTO ticket;
-    private StatusCodeDTO statusCode;
 }

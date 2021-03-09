@@ -9,8 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ListResponseDTO<T> {
+public class ListResponseDTO<T> extends ResponseDTO{
     private List<T> list;
     private Integer total;
-    private StatusCodeDTO statusCodeDTO;
 }

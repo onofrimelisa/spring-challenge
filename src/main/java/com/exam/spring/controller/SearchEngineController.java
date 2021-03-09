@@ -37,7 +37,7 @@ public class SearchEngineController {
     }
 
     @PostMapping("/purchase-request")
-    public TicketDTO purchaseRequest(@RequestBody PurchaseRequestDTO purchaseRequestDTO) throws InsufficientStockException, ProductNotFoundException {
+    public TicketResponseDTO purchaseRequest(@RequestBody PurchaseRequestDTO purchaseRequestDTO) throws InsufficientStockException, ProductNotFoundException {
         return this.searchEngineService.purchaseRequest(purchaseRequestDTO);
     }
 
@@ -52,7 +52,7 @@ public class SearchEngineController {
     }
 
     @PostMapping("/customers/new")
-    public CustomerDTO addCustomer(@RequestBody CustomerRequestDTO customer) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
+    public CustomerResponseDTO addCustomer(@RequestBody CustomerRequestDTO customer) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
         return this.searchEngineService.addCustomer(customer);
     }
 
