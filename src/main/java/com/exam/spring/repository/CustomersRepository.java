@@ -20,7 +20,6 @@ public class CustomersRepository implements ICustomersRepository {
         newCustomer.setLastname(customerRequestDTO.getLastname());
         newCustomer.setName(customerRequestDTO.getName());
         this.customers.put(newCustomer.getCustomerId(), newCustomer);
-        System.out.println(this.customers.size());
         return newCustomer;
     }
 

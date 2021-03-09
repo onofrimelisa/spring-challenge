@@ -24,29 +24,19 @@ public class SearchEngineService implements ISearchEngineService {
     private ICustomersRepository customersRepository;
 
     @Override
-    public ProductsListResponseDTO getProducts() {
-        List<ProductDTO> products = this.productsRepository.getProducts();
-        ProductsListResponseDTO response = new ProductsListResponseDTO();
-        response.setArticles(products);
-        response.setTotal(products.size());
-        response.setStatusCodeDTO(getSuccessfulOperationStatusCode());
-        return response;
+    public ListResponseDTO<ProductDTO> getProducts() {
+        return createList(this.productsRepository.getProducts());
     }
 
     @Override
-    public ProductsListResponseDTO getProductsWithFilters(Map<String, String> filters, Integer order) {
-        List<ProductDTO> productsList = this.getProducts().getArticles();
-        ProductsListResponseDTO response = new ProductsListResponseDTO();
+    public ListResponseDTO<ProductDTO> getProductsWithFilters(Map<String, String> filters, Integer order) {
+        List<ProductDTO> productsList = this.getProducts().getList();
 
         for (Map.Entry<String, String> filter : filters.entrySet()) {
             productsList = this.productsRepository.getProductsWithFilter(filter.getKey(), filter.getValue(), productsList, order);
         }
 
-        response.setArticles(productsList);
-        response.setTotal(productsList.size());
-        response.setStatusCodeDTO(getSuccessfulOperationStatusCode());
-
-        return response;
+        return createList(productsList);
     }
 
     @Override
@@ -86,10 +76,6 @@ public class SearchEngineService implements ISearchEngineService {
         return response;
     }
 
-    private Boolean missingMandatoryField(String field){
-        return field == null || field.length() == 0;
-    }
-
     @Override
     public CustomerDTO addCustomer(CustomerRequestDTO customerRequestDTO) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
         if (missingMandatoryField(customerRequestDTO.getDni()) ||
@@ -106,14 +92,15 @@ public class SearchEngineService implements ISearchEngineService {
     }
 
     @Override
-    public CustomersListResponseDTO getCustomers() {
-        CustomersListResponseDTO customersList = new CustomersListResponseDTO();
-        List<CustomerDTO> customers = this.customersRepository.getCustomers();
-        customersList.setCustomers(customers);
-        customersList.setTotal(customers.size());
-        customersList.setStatusCodeDTO(getSuccessfulOperationStatusCode());
-        return customersList;
+    public ListResponseDTO<CustomerDTO> getCustomers() {
+        return createList(this.customersRepository.getCustomers());
     }
+
+    /* #######################################################################################################
+
+                                            HELPERS
+
+     ######################################################################################################### */
 
     private StatusCodeDTO getSuccessfulOperationStatusCode() {
         return new StatusCodeDTO("Operation performed successfully", HttpStatus.OK);
@@ -121,5 +108,17 @@ public class SearchEngineService implements ISearchEngineService {
 
     private StatusCodeDTO getCustomStatusCode(String message, HttpStatus statusCode){
         return new StatusCodeDTO(message, statusCode);
+    }
+
+    private <T> ListResponseDTO<T> createList(List<T> list) {
+        ListResponseDTO<T> newList = new ListResponseDTO();
+        newList.setList(list);
+        newList.setTotal(list.size());
+        newList.setStatusCodeDTO(getSuccessfulOperationStatusCode());
+        return newList;
+    }
+
+    private Boolean missingMandatoryField(String field){
+        return field == null || field.length() == 0;
     }
 }

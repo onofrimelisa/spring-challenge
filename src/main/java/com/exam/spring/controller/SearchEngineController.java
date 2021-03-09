@@ -16,7 +16,7 @@ public class SearchEngineController {
     private ISearchEngineService searchEngineService;
 
     @GetMapping("/articles")
-    public ProductsListResponseDTO getProductsFiltered(
+    public ListResponseDTO<ProductDTO> getProductsFiltered(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "price", required = false) String price,
@@ -57,7 +57,7 @@ public class SearchEngineController {
     }
 
     @GetMapping("/customers")
-    public CustomersListResponseDTO getCustomers(){
+    public ListResponseDTO<CustomerDTO> getCustomers(){
         return this.searchEngineService.getCustomers();
     }
 
