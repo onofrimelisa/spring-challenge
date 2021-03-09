@@ -14,5 +14,4 @@ public class BucketResponseDTO {
     private List<PurchaseDTO> articles;
     private Double total;
     private StatusCodeDTO statusCodeDTO;
-    //test
 }

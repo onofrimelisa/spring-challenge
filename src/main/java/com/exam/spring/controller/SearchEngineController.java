@@ -1,10 +1,7 @@
 package com.exam.spring.controller;
 
 import com.exam.spring.dto.*;
-import com.exam.spring.exception.BucketNotFoundException;
-import com.exam.spring.exception.InsufficientStockException;
-import com.exam.spring.exception.ProductNotFoundException;
-import com.exam.spring.exception.SearchEngineException;
+import com.exam.spring.exception.*;
 import com.exam.spring.interfaces.ISearchEngineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +49,11 @@ public class SearchEngineController {
     @PostMapping("/purchase-bucket/{bucketId}")
     public BucketResponseDTO addToBucket(@PathVariable Integer bucketId) throws InsufficientStockException, ProductNotFoundException, BucketNotFoundException {
         return this.searchEngineService.purchaseBucket(bucketId);
+    }
+
+    @PostMapping("/customers/new")
+    public CustomerDTO addCustomer(@RequestBody CustomerRequestDTO customer) throws CustomerAlreadyExistsException {
+        return this.searchEngineService.addCustomer(customer);
     }
 
     @ExceptionHandler(SearchEngineException.class)

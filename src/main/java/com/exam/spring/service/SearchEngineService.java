@@ -2,9 +2,11 @@ package com.exam.spring.service;
 
 import com.exam.spring.dto.*;
 import com.exam.spring.exception.BucketNotFoundException;
+import com.exam.spring.exception.CustomerAlreadyExistsException;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.interfaces.IBucketsRepository;
+import com.exam.spring.interfaces.ICustomersRepository;
 import com.exam.spring.interfaces.IProductsRepository;
 import com.exam.spring.interfaces.ISearchEngineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ public class SearchEngineService implements ISearchEngineService {
     private IProductsRepository productsRepository;
     @Autowired
     private IBucketsRepository bucketsRepository;
+    @Autowired
+    private ICustomersRepository customersRepository;
 
     @Override
     public ProductsListResponseDTO getProducts() {
@@ -81,5 +85,17 @@ public class SearchEngineService implements ISearchEngineService {
         response.setStatusCodeDTO(new StatusCodeDTO("Products of bucket " + bucketId + " purchased successfully", HttpStatus.OK));
 
         return response;
+    }
+
+    @Override
+    public CustomerDTO addCustomer(CustomerRequestDTO customerRequestDTO) throws CustomerAlreadyExistsException {
+        String dni = customerRequestDTO.getDni();
+
+        if (this.customersRepository.getCustomerByDNI(dni).isPresent()) {
+            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("The customer with the DNI " + dni + " already exists", HttpStatus.BAD_REQUEST);
+            throw new CustomerAlreadyExistsException(statusCodeDTO);
+        }
+
+        return this.customersRepository.addCustomer(customerRequestDTO);
     }
 }
