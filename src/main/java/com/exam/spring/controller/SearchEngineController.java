@@ -47,13 +47,18 @@ public class SearchEngineController {
     }
 
     @PostMapping("/purchase-bucket/{bucketId}")
-    public BucketResponseDTO addToBucket(@PathVariable Integer bucketId) throws InsufficientStockException, ProductNotFoundException, BucketNotFoundException {
+    public BucketResponseDTO addToBucket(@PathVariable Integer bucketId) throws ProductNotFoundException, BucketNotFoundException {
         return this.searchEngineService.purchaseBucket(bucketId);
     }
 
     @PostMapping("/customers/new")
-    public CustomerDTO addCustomer(@RequestBody CustomerRequestDTO customer) throws CustomerAlreadyExistsException {
+    public CustomerDTO addCustomer(@RequestBody CustomerRequestDTO customer) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
         return this.searchEngineService.addCustomer(customer);
+    }
+
+    @GetMapping("/customers")
+    public CustomersListResponseDTO getCustomers(){
+        return this.searchEngineService.getCustomers();
     }
 
     @ExceptionHandler(SearchEngineException.class)

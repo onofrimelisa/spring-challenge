@@ -1,10 +1,7 @@
 package com.exam.spring.service;
 
 import com.exam.spring.dto.*;
-import com.exam.spring.exception.BucketNotFoundException;
-import com.exam.spring.exception.CustomerAlreadyExistsException;
-import com.exam.spring.exception.InsufficientStockException;
-import com.exam.spring.exception.ProductNotFoundException;
+import com.exam.spring.exception.*;
 import com.exam.spring.interfaces.IBucketsRepository;
 import com.exam.spring.interfaces.ICustomersRepository;
 import com.exam.spring.interfaces.IProductsRepository;
@@ -32,6 +29,7 @@ public class SearchEngineService implements ISearchEngineService {
         ProductsListResponseDTO response = new ProductsListResponseDTO();
         response.setArticles(products);
         response.setTotal(products.size());
+        response.setStatusCodeDTO(getSuccessfulOperationStatusCode());
         return response;
     }
 
@@ -46,6 +44,7 @@ public class SearchEngineService implements ISearchEngineService {
 
         response.setArticles(productsList);
         response.setTotal(productsList.size());
+        response.setStatusCodeDTO(getSuccessfulOperationStatusCode());
 
         return response;
     }
@@ -62,7 +61,7 @@ public class SearchEngineService implements ISearchEngineService {
 
         TicketDTO ticket = new TicketDTO();
         ticket.setTicket(ticketInfoDTO);
-        ticket.setStatusCode(new StatusCodeDTO("The purchase was done successfully", HttpStatus.OK));
+        ticket.setStatusCode(getSuccessfulOperationStatusCode());
 
         return ticket;
     }
@@ -74,7 +73,7 @@ public class SearchEngineService implements ISearchEngineService {
         if(bucket.isEmpty()) bucket = Optional.of(this.bucketsRepository.createBucket(bucketId));
 
         BucketResponseDTO response = this.bucketsRepository.addToBucket(bucket.get(), purchaseDTO.getProductId(), purchaseDTO.getQuantity());
-        response.setStatusCodeDTO(new StatusCodeDTO("Product added to the bucket successfully", HttpStatus.OK));
+        response.setStatusCodeDTO(getSuccessfulOperationStatusCode());
 
         return response;
     }
@@ -82,20 +81,45 @@ public class SearchEngineService implements ISearchEngineService {
     @Override
     public BucketResponseDTO purchaseBucket(Integer bucketId) throws ProductNotFoundException, BucketNotFoundException {
         BucketResponseDTO response = this.bucketsRepository.purchaseBucket(bucketId);
-        response.setStatusCodeDTO(new StatusCodeDTO("Products of bucket " + bucketId + " purchased successfully", HttpStatus.OK));
+        response.setStatusCodeDTO(getSuccessfulOperationStatusCode());
 
         return response;
     }
 
+    private Boolean missingMandatoryField(String field){
+        return field == null || field.length() == 0;
+    }
+
     @Override
-    public CustomerDTO addCustomer(CustomerRequestDTO customerRequestDTO) throws CustomerAlreadyExistsException {
+    public CustomerDTO addCustomer(CustomerRequestDTO customerRequestDTO) throws CustomerAlreadyExistsException, InsufficientCustomersInformationException {
+        if (missingMandatoryField(customerRequestDTO.getDni()) ||
+            missingMandatoryField(customerRequestDTO.getLastname()) ||
+            missingMandatoryField(customerRequestDTO.getName()))
+            throw new InsufficientCustomersInformationException(getCustomStatusCode("Some mandatory fields for the customer creation are missing", HttpStatus.BAD_REQUEST));
+
         String dni = customerRequestDTO.getDni();
 
-        if (this.customersRepository.getCustomerByDNI(dni).isPresent()) {
-            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("The customer with the DNI " + dni + " already exists", HttpStatus.BAD_REQUEST);
-            throw new CustomerAlreadyExistsException(statusCodeDTO);
-        }
+        if (this.customersRepository.getCustomerByDNI(dni).isPresent())
+            throw new CustomerAlreadyExistsException(getCustomStatusCode("The customer with the DNI " + dni + " already exists", HttpStatus.BAD_REQUEST));
 
         return this.customersRepository.addCustomer(customerRequestDTO);
+    }
+
+    @Override
+    public CustomersListResponseDTO getCustomers() {
+        CustomersListResponseDTO customersList = new CustomersListResponseDTO();
+        List<CustomerDTO> customers = this.customersRepository.getCustomers();
+        customersList.setCustomers(customers);
+        customersList.setTotal(customers.size());
+        customersList.setStatusCodeDTO(getSuccessfulOperationStatusCode());
+        return customersList;
+    }
+
+    private StatusCodeDTO getSuccessfulOperationStatusCode() {
+        return new StatusCodeDTO("Operation performed successfully", HttpStatus.OK);
+    }
+
+    private StatusCodeDTO getCustomStatusCode(String message, HttpStatus statusCode){
+        return new StatusCodeDTO(message, statusCode);
     }
 }

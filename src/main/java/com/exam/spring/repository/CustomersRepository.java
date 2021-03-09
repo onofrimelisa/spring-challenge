@@ -5,9 +5,8 @@ import com.exam.spring.dto.CustomerRequestDTO;
 import com.exam.spring.interfaces.ICustomersRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class CustomersRepository implements ICustomersRepository {
@@ -28,5 +27,10 @@ public class CustomersRepository implements ICustomersRepository {
     @Override
     public Optional<CustomerDTO> getCustomerByDNI(String dni) {
         return this.customers.values().stream().filter(customerDTO -> customerDTO.getDni().equals(dni)).findFirst();
+    }
+
+    @Override
+    public List<CustomerDTO> getCustomers() {
+        return new ArrayList<>(this.customers.values());
     }
 }
