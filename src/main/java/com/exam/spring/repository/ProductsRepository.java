@@ -6,6 +6,7 @@ import com.exam.spring.exception.ProductNotFoundException;
 import com.exam.spring.exception.ServerErrorException;
 import com.exam.spring.helpers.OrderByName;
 import com.exam.spring.helpers.OrderByPrice;
+import com.exam.spring.helpers.StatusCode;
 import com.exam.spring.interfaces.IOrder;
 import com.exam.spring.interfaces.IProductsRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -58,36 +59,6 @@ public class ProductsRepository implements IProductsRepository {
     }
 
     @Override
-    public List<ProductDTO> filterByCategory(String category, List<ProductDTO> listToFilter){
-        return listToFilter.stream().filter(product -> product.getCategory().equalsIgnoreCase(category)).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ProductDTO> filterByName(String name, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ProductDTO> filterByBrand(String brand, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getBrand().equalsIgnoreCase(brand)).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ProductDTO> filterByPrice(Double price, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getPrice().compareTo(price) == 0).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ProductDTO> filterByFreeShipping(Boolean freeShipping, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getFreeShipping().equals(freeShipping)).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ProductDTO> filterByPrestige(Integer prestige, List<ProductDTO> listToFilter) {
-        return listToFilter.stream().filter(product -> product.getPrestige().compareTo(prestige) == 0).collect(Collectors.toList());
-    }
-
-    @Override
     public List<ProductDTO> orderProducts(List<ProductDTO> productsList, Integer order) {
         IOrder orderMethod;
 
@@ -110,12 +81,13 @@ public class ProductsRepository implements IProductsRepository {
             orderMethod = new OrderByPrice(true);
         }
 
+        orderMethod.orderList(productsList);
 
-        return orderMethod.orderList(productsList);
+        return productsList;
     }
 
     @Override
-    public List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO> motherList, Integer order) {
+    public List<ProductDTO> getProductsWithFilter(String filterKey, String filterValue, List<ProductDTO> motherList) {
         switch(filterKey)
         {
             case "name":
@@ -138,25 +110,21 @@ public class ProductsRepository implements IProductsRepository {
                 break;
         }
 
-        return orderProducts(motherList, order);
+        return motherList;
     }
 
     @Override
     public ProductDTO getProductById(Integer id) throws ProductNotFoundException {
         Optional<ProductDTO> product = this.products.stream().filter(productDTO -> productDTO.getId().equals(id)).findFirst();
-        if (product.isEmpty()) {
-            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Product with id " + id + " not found", HttpStatus.NOT_FOUND);
-            throw new ProductNotFoundException(statusCodeDTO);
-        }
+        if (product.isEmpty())
+            throw new ProductNotFoundException(StatusCode.getCustomStatusCode("Product with id " + id + " not found", HttpStatus.NOT_FOUND));
         return product.get();
     }
 
     @Override
-    public void checkStock(ProductDTO product, Integer quantity) throws InsufficientStockException, ProductNotFoundException {
-        if (product.getStock() < quantity) {
-            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Product with id " + product.getId() + " has insufficient stock", HttpStatus.BAD_REQUEST);
-            throw new InsufficientStockException(statusCodeDTO);
-        }
+    public void checkStock(ProductDTO product, Integer quantity) throws InsufficientStockException {
+        if (product.getStock() < quantity)
+            throw new InsufficientStockException(StatusCode.getCustomStatusCode("Product with id " + product.getId() + " has insufficient stock", HttpStatus.BAD_REQUEST));
     }
 
     @Override
@@ -169,7 +137,7 @@ public class ProductsRepository implements IProductsRepository {
 
     @Override
     public void updateStock(ProductDTO product, Integer quantity) {
-        Integer index = 0;
+        int index = 0;
         for (ProductDTO productDTO : products) {
             if (productDTO.getId().equals(product.getId())) break;
             index++;
@@ -194,5 +162,36 @@ public class ProductsRepository implements IProductsRepository {
 
         return total;
     }
+
+    /* #######################################################################################################
+
+                                            HELPERS
+
+     ######################################################################################################### */
+
+    private List<ProductDTO> filterByCategory(String category, List<ProductDTO> listToFilter){
+        return listToFilter.stream().filter(product -> product.getCategory().equalsIgnoreCase(category)).collect(Collectors.toList());
+    }
+
+    private List<ProductDTO> filterByName(String name, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
+    }
+
+    private List<ProductDTO> filterByBrand(String brand, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getBrand().equalsIgnoreCase(brand)).collect(Collectors.toList());
+    }
+
+    private List<ProductDTO> filterByPrice(Double price, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getPrice().compareTo(price) == 0).collect(Collectors.toList());
+    }
+
+    private List<ProductDTO> filterByFreeShipping(Boolean freeShipping, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getFreeShipping().equals(freeShipping)).collect(Collectors.toList());
+    }
+
+    private List<ProductDTO> filterByPrestige(Integer prestige, List<ProductDTO> listToFilter) {
+        return listToFilter.stream().filter(product -> product.getPrestige().compareTo(prestige) == 0).collect(Collectors.toList());
+    }
+
 
 }

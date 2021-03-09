@@ -7,6 +7,7 @@ import com.exam.spring.dto.StatusCodeDTO;
 import com.exam.spring.exception.BucketNotFoundException;
 import com.exam.spring.exception.InsufficientStockException;
 import com.exam.spring.exception.ProductNotFoundException;
+import com.exam.spring.helpers.StatusCode;
 import com.exam.spring.interfaces.IBucketsRepository;
 import com.exam.spring.interfaces.IProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,10 +71,8 @@ public class BucketsRepository implements IBucketsRepository {
     @Override
     public BucketResponseDTO purchaseBucket(Integer bucketId) throws BucketNotFoundException, ProductNotFoundException {
         Optional<BucketResponseDTO> bucket = getBucket(bucketId);
-        if (bucket.isEmpty()) {
-            StatusCodeDTO statusCodeDTO = new StatusCodeDTO("Bucket with id " + bucketId + " was not found", HttpStatus.NOT_FOUND);
-            throw new BucketNotFoundException(statusCodeDTO);
-        }
+        if (bucket.isEmpty())
+            throw new BucketNotFoundException(StatusCode.getCustomStatusCode("Bucket with id " + bucketId + " was not found", HttpStatus.NOT_FOUND));
         this.productsRepository.buyProducts(bucket.get().getArticles());
         this.buckets.remove(bucket.get());
         return bucket.get();

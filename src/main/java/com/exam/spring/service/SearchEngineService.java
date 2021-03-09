@@ -2,6 +2,7 @@ package com.exam.spring.service;
 
 import com.exam.spring.dto.*;
 import com.exam.spring.exception.*;
+import com.exam.spring.helpers.StatusCode;
 import com.exam.spring.interfaces.IBucketsRepository;
 import com.exam.spring.interfaces.ICustomersRepository;
 import com.exam.spring.interfaces.IProductsRepository;
@@ -33,8 +34,10 @@ public class SearchEngineService implements ISearchEngineService {
         List<ProductDTO> productsList = this.getProducts().getList();
 
         for (Map.Entry<String, String> filter : filters.entrySet()) {
-            productsList = this.productsRepository.getProductsWithFilter(filter.getKey(), filter.getValue(), productsList, order);
+            productsList = this.productsRepository.getProductsWithFilter(filter.getKey(), filter.getValue(), productsList);
         }
+
+        this.productsRepository.orderProducts(productsList, order);
 
         return createList(productsList);
     }
@@ -51,7 +54,7 @@ public class SearchEngineService implements ISearchEngineService {
 
         TicketDTO ticket = new TicketDTO();
         ticket.setTicket(ticketInfoDTO);
-        ticket.setStatusCode(getSuccessfulOperationStatusCode());
+        ticket.setStatusCode(StatusCode.getSuccessfulOperationStatusCode());
 
         return ticket;
     }
@@ -63,7 +66,7 @@ public class SearchEngineService implements ISearchEngineService {
         if(bucket.isEmpty()) bucket = Optional.of(this.bucketsRepository.createBucket(bucketId));
 
         BucketResponseDTO response = this.bucketsRepository.addToBucket(bucket.get(), purchaseDTO.getProductId(), purchaseDTO.getQuantity());
-        response.setStatusCodeDTO(getSuccessfulOperationStatusCode());
+        response.setStatusCodeDTO(StatusCode.getSuccessfulOperationStatusCode());
 
         return response;
     }
@@ -71,7 +74,7 @@ public class SearchEngineService implements ISearchEngineService {
     @Override
     public BucketResponseDTO purchaseBucket(Integer bucketId) throws ProductNotFoundException, BucketNotFoundException {
         BucketResponseDTO response = this.bucketsRepository.purchaseBucket(bucketId);
-        response.setStatusCodeDTO(getSuccessfulOperationStatusCode());
+        response.setStatusCodeDTO(StatusCode.getSuccessfulOperationStatusCode());
 
         return response;
     }
@@ -81,12 +84,12 @@ public class SearchEngineService implements ISearchEngineService {
         if (missingMandatoryField(customerRequestDTO.getDni()) ||
             missingMandatoryField(customerRequestDTO.getLastname()) ||
             missingMandatoryField(customerRequestDTO.getName()))
-            throw new InsufficientCustomersInformationException(getCustomStatusCode("Some mandatory fields for the customer creation are missing", HttpStatus.BAD_REQUEST));
+            throw new InsufficientCustomersInformationException(StatusCode.getCustomStatusCode("Some mandatory fields for the customer creation are missing", HttpStatus.BAD_REQUEST));
 
         String dni = customerRequestDTO.getDni();
 
         if (this.customersRepository.getCustomerByDNI(dni).isPresent())
-            throw new CustomerAlreadyExistsException(getCustomStatusCode("The customer with the DNI " + dni + " already exists", HttpStatus.BAD_REQUEST));
+            throw new CustomerAlreadyExistsException(StatusCode.getCustomStatusCode("The customer with the DNI " + dni + " already exists", HttpStatus.BAD_REQUEST));
 
         return this.customersRepository.addCustomer(customerRequestDTO);
     }
@@ -98,23 +101,15 @@ public class SearchEngineService implements ISearchEngineService {
 
     /* #######################################################################################################
 
-                                            HELPERS
+                                            SERVICE HELPERS
 
      ######################################################################################################### */
-
-    private StatusCodeDTO getSuccessfulOperationStatusCode() {
-        return new StatusCodeDTO("Operation performed successfully", HttpStatus.OK);
-    }
-
-    private StatusCodeDTO getCustomStatusCode(String message, HttpStatus statusCode){
-        return new StatusCodeDTO(message, statusCode);
-    }
 
     private <T> ListResponseDTO<T> createList(List<T> list) {
         ListResponseDTO<T> newList = new ListResponseDTO();
         newList.setList(list);
         newList.setTotal(list.size());
-        newList.setStatusCodeDTO(getSuccessfulOperationStatusCode());
+        newList.setStatusCodeDTO(StatusCode.getSuccessfulOperationStatusCode());
         return newList;
     }
 
