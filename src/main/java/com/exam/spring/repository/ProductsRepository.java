@@ -64,7 +64,7 @@ public class ProductsRepository implements IProductsRepository {
     public void orderProducts(List<ProductDTO> productsList, Integer order) {
         IOrder orderMethod;
 
-        if (!(order == null)) {
+        if (order != null) {
             switch (order){
                 case 0:
                     orderMethod = new OrderByName(true);
