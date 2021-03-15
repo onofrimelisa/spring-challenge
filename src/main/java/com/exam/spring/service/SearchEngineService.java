@@ -17,20 +17,22 @@ import java.util.Optional;
 
 @Service
 public class SearchEngineService implements ISearchEngineService {
+    private final IProductsRepository productsRepository;
+    private final IBucketsRepository bucketsRepository;
+    private final ICustomersRepository customersRepository;
+
     @Autowired
-    private IProductsRepository productsRepository;
-    @Autowired
-    private IBucketsRepository bucketsRepository;
-    @Autowired
-    private ICustomersRepository customersRepository;
+    public SearchEngineService(IProductsRepository productsRepository, IBucketsRepository bucketsRepository, ICustomersRepository customersRepository) {
+        this.productsRepository = productsRepository;
+        this.bucketsRepository = bucketsRepository;
+        this.customersRepository = customersRepository;
+    }
 
     @Override
     public ListResponseDTO<ProductDTO> getProductsWithFilters(Map<String, String> filters, Integer order) {
         List<ProductDTO> productsList = this.productsRepository.getProducts();
 
-        for (Map.Entry<String, String> filter : filters.entrySet()) {
-            productsList = this.productsRepository.getProductsWithFilter(filters, productsList);
-        }
+        productsList = this.productsRepository.getProductsWithFilter(filters, productsList);
 
         this.productsRepository.orderProducts(productsList, order);
 
@@ -112,7 +114,7 @@ public class SearchEngineService implements ISearchEngineService {
      ######################################################################################################### */
 
     private <T> ListResponseDTO<T> createList(List<T> list) {
-        ListResponseDTO<T> newList = new ListResponseDTO();
+        ListResponseDTO<T> newList = new ListResponseDTO<>();
         newList.setList(list);
         newList.setTotal(list.size());
         newList.setStatusCodeDTO(StatusCode.getSuccessfulOperationStatusCode());

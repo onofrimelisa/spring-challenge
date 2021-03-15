@@ -12,8 +12,12 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1")
 public class SearchEngineController {
-    @Autowired
     private ISearchEngineService searchEngineService;
+
+    @Autowired
+    public SearchEngineController(ISearchEngineService searchEngineService) {
+        this.searchEngineService = searchEngineService;
+    }
 
     @GetMapping("/articles")
     public ListResponseDTO<ProductDTO> getProductsFiltered(

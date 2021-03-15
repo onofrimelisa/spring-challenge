@@ -84,7 +84,6 @@ public class ProductsRepository implements IProductsRepository {
         }
 
         orderMethod.orderList(productsList);
-
     }
 
     @Override
