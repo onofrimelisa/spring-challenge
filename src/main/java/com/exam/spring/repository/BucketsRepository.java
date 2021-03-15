@@ -20,10 +20,15 @@ import java.util.Optional;
 
 @Repository
 public class BucketsRepository implements IBucketsRepository {
-    @Autowired
     private IProductsRepository productsRepository;
+    private List<BucketResponseDTO> buckets;
 
-    private List<BucketResponseDTO> buckets = new ArrayList<>();
+
+    @Autowired public BucketsRepository(IProductsRepository productsRepository) {
+        this.productsRepository = productsRepository;
+        this.buckets = new ArrayList<>();
+    }
+
 
     @Override
     public Optional<BucketResponseDTO> getBucket(Integer bucketId) {

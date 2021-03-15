@@ -3,9 +3,7 @@ package com.exam.spring.repository;
 import com.exam.spring.dto.CustomerDTO;
 import com.exam.spring.dto.CustomerRequestDTO;
 import com.exam.spring.interfaces.ICustomersRepository;
-import com.exam.spring.interfaces.IProductsRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
