@@ -30,7 +30,7 @@ public class SearchEngineControllerTest {
     }
 
     @Test
-    public void getProductsWithoutAnyFilter() {
+    void getProductsWithoutAnyFilter() {
         // set
         List<ProductDTO> products = getListOfProducts();
         ListResponseDTO<ProductDTO> response = new ListResponseDTO();
@@ -44,11 +44,11 @@ public class SearchEngineControllerTest {
 
         //assert
         Assertions.assertIterableEquals(products, result.getList());
-        Assertions.assertEquals(result.getStatusCodeDTO().getStatus(), HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCodeDTO().getStatus());
     }
 
     @Test
-    public void getProductsFilteredByCategory() {
+    void getProductsFilteredByCategory() {
         // set
         String category = "Herramientas";
         List<ProductDTO> products = getListOfProductsWithASpecificCategory();

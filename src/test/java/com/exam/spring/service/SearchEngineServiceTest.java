@@ -1,6 +1,5 @@
 package com.exam.spring.service;
 
-import com.exam.spring.controller.SearchEngineController;
 import com.exam.spring.dto.*;
 import com.exam.spring.exception.*;
 import com.exam.spring.helpers.StatusCode;
@@ -19,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class SearchEngineServiceTest {
@@ -38,7 +38,7 @@ public class SearchEngineServiceTest {
     }
 
     @Test
-    public void getProductsWithFilters(){
+    void getProductsWithFilters(){
         // Arrange
         List<ProductDTO> products = getListOfProducts();
         List<ProductDTO> expectedResult = getListOfProductsWithASpecificCategory();
@@ -49,7 +49,7 @@ public class SearchEngineServiceTest {
         HashMap<String, String> filters = new HashMap<>();
         filters.put("category", "Herramientas");
         Mockito.when(productsRepository.getProducts()).thenReturn(products);
-        Mockito.when(productsRepository.getProductsWithFilter(filters, products)).thenReturn(expectedResult);
+        Mockito.when(productsRepository.getProductsWithFilter(Mockito.any(), eq(products))).thenReturn(expectedResult);
 
         // Act
         ListResponseDTO result = this.searchEngineService.getProductsWithFilters(filters, 0);
@@ -61,10 +61,10 @@ public class SearchEngineServiceTest {
     }
 
     @Test
-    public void purchaseRequestSuccess() throws InsufficientStockException, ProductNotFoundException {
+    void purchaseRequestSuccess() throws InsufficientStockException, ProductNotFoundException {
         // Arrange
         PurchaseRequestDTO purchaseRequest = getPurchaseRequestDTO();
-        Mockito.doNothing().when(productsRepository).checkStock(purchaseRequest.getArticles());
+        Mockito.doNothing().when(productsRepository).checkStock(Mockito.any());
 
         // Act & Assert
         TicketResponseDTO result = Assertions.assertDoesNotThrow(
@@ -75,11 +75,11 @@ public class SearchEngineServiceTest {
     }
 
     @Test
-    public void purchaseRequestThrowsInsufficientStockException() throws InsufficientStockException, ProductNotFoundException {
+    void purchaseRequestThrowsInsufficientStockException() throws InsufficientStockException, ProductNotFoundException {
         // Arrange
         PurchaseRequestDTO purchaseRequest = getPurchaseRequestDTO();
         InsufficientStockException expectedException = new InsufficientStockException(StatusCode.getCustomStatusCode("Product has insufficient stock", HttpStatus.BAD_REQUEST));
-        Mockito.doThrow(expectedException).when(productsRepository).checkStock(purchaseRequest.getArticles());
+        Mockito.doThrow(expectedException).when(productsRepository).checkStock(Mockito.any());
 
         // Act & Assert
         InsufficientStockException thrownException = Assertions.assertThrows(
@@ -91,11 +91,11 @@ public class SearchEngineServiceTest {
     }
 
     @Test
-    public void purchaseRequestThrowsProductNotFoundException() throws InsufficientStockException, ProductNotFoundException {
+    void purchaseRequestThrowsProductNotFoundException() throws InsufficientStockException, ProductNotFoundException {
         // Arrange
         PurchaseRequestDTO purchaseRequest = getPurchaseRequestDTO();
         ProductNotFoundException expectedException = new ProductNotFoundException(StatusCode.getCustomStatusCode("Product not found", HttpStatus.NOT_FOUND));
-        Mockito.doThrow(expectedException).when(productsRepository).checkStock(purchaseRequest.getArticles());
+        Mockito.doThrow(expectedException).when(productsRepository).checkStock(Mockito.any());
 
         // Act & Assert
         ProductNotFoundException thrownException = Assertions.assertThrows(
@@ -107,11 +107,11 @@ public class SearchEngineServiceTest {
     }
 
     @Test
-    public void addToBucketSuccess() throws InsufficientStockException, ProductNotFoundException{
+    void addToBucketSuccess() throws InsufficientStockException, ProductNotFoundException{
         BucketResponseDTO bucket = new BucketResponseDTO();
         bucket.setArticles(getListPurchaseDTO());
-        Mockito.when(bucketsRepository.getBucket(0)).thenReturn(Optional.of(bucket));
-        Mockito.when(bucketsRepository.addToBucket(bucket, 0, 0)).thenReturn(bucket);
+        Mockito.when(bucketsRepository.getBucket(Mockito.anyInt())).thenReturn(Optional.of(bucket));
+        Mockito.when(bucketsRepository.addToBucket(Mockito.any(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(bucket);
 
         // Act & Assert
         BucketResponseDTO result = Assertions.assertDoesNotThrow(
@@ -122,12 +122,12 @@ public class SearchEngineServiceTest {
     }
 
     @Test
-    public void addToBucketThrowsProductNotFoundException() throws InsufficientStockException, ProductNotFoundException{
+    void addToBucketThrowsProductNotFoundException() throws InsufficientStockException, ProductNotFoundException{
         BucketResponseDTO bucket = new BucketResponseDTO();
         bucket.setArticles(getListPurchaseDTO());
         ProductNotFoundException expectedException = new ProductNotFoundException(StatusCode.getCustomStatusCode("Product not found", HttpStatus.NOT_FOUND));
-        Mockito.when(bucketsRepository.getBucket(0)).thenReturn(Optional.of(bucket));
-        Mockito.doThrow(expectedException).when(bucketsRepository).addToBucket(bucket, 0, 0);
+        Mockito.when(bucketsRepository.getBucket(Mockito.anyInt())).thenReturn(Optional.of(bucket));
+        Mockito.doThrow(expectedException).when(bucketsRepository).addToBucket(Mockito.any(), Mockito.anyInt(), Mockito.anyInt());
 
         // Act & Assert
         ProductNotFoundException thrownException = Assertions.assertThrows(
@@ -139,13 +139,13 @@ public class SearchEngineServiceTest {
     }
 
     @Test
-    public void addToBucketThrowsInsufficientStockException() throws InsufficientStockException, ProductNotFoundException{
+    void addToBucketThrowsInsufficientStockException() throws InsufficientStockException, ProductNotFoundException{
         // Arrange
         BucketResponseDTO bucket = new BucketResponseDTO();
         bucket.setArticles(getListPurchaseDTO());
-        Mockito.when(bucketsRepository.getBucket(0)).thenReturn(Optional.of(bucket));
+        Mockito.when(bucketsRepository.getBucket(Mockito.anyInt())).thenReturn(Optional.of(bucket));
         InsufficientStockException expectedException = new InsufficientStockException(StatusCode.getCustomStatusCode("Product has insufficient stock", HttpStatus.BAD_REQUEST));
-        Mockito.doThrow(expectedException).when(bucketsRepository).addToBucket(bucket, 0, 0);
+        Mockito.doThrow(expectedException).when(bucketsRepository).addToBucket(Mockito.any(), Mockito.anyInt(), Mockito.anyInt());
 
         // Act & Assert
         InsufficientStockException thrownException = Assertions.assertThrows(
@@ -161,8 +161,8 @@ public class SearchEngineServiceTest {
         // Arrange
         BucketResponseDTO bucket = new BucketResponseDTO();
         bucket.setArticles(getListPurchaseDTO());
-        Mockito.when(bucketsRepository.getBucket(0)).thenReturn(Optional.of(bucket));
-        Mockito.when(bucketsRepository.purchaseBucket(0)).thenReturn(bucket);
+        Mockito.when(bucketsRepository.getBucket(Mockito.anyInt())).thenReturn(Optional.of(bucket));
+        Mockito.when(bucketsRepository.purchaseBucket(Mockito.anyInt())).thenReturn(bucket);
 
         // Act & Assert
         BucketResponseDTO result = Assertions.assertDoesNotThrow(
@@ -178,7 +178,7 @@ public class SearchEngineServiceTest {
         BucketResponseDTO bucket = new BucketResponseDTO();
         bucket.setArticles(getListPurchaseDTO());
         BucketNotFoundException expectedException = new BucketNotFoundException(StatusCode.getCustomStatusCode("Bucket not found", HttpStatus.NOT_FOUND));
-        Mockito.doThrow(expectedException).when(bucketsRepository).purchaseBucket(0);
+        Mockito.doThrow(expectedException).when(bucketsRepository).purchaseBucket(Mockito.anyInt());
 
         // Act & Assert
         BucketNotFoundException thrownException = Assertions.assertThrows(
@@ -194,8 +194,8 @@ public class SearchEngineServiceTest {
         // Arrange
         CustomerRequestDTO customerRequestDTO = getCustomerRequestDTO();
         CustomerDTO customer = getCustomerDTO(customerRequestDTO);
-        Mockito.when(customersRepository.getCustomerByDNI(customerRequestDTO.getDni())).thenReturn(Optional.empty());
-        Mockito.when(customersRepository.addCustomer(customerRequestDTO)).thenReturn(customer);
+        Mockito.when(customersRepository.getCustomerByDNI(Mockito.anyString())).thenReturn(Optional.empty());
+        Mockito.when(customersRepository.addCustomer(Mockito.any())).thenReturn(customer);
 
         // Act & Assert
         CustomerResponseDTO result = Assertions.assertDoesNotThrow(
@@ -210,7 +210,7 @@ public class SearchEngineServiceTest {
         // Arrange
         CustomerRequestDTO customerRequestDTO = getCustomerRequestDTO();
         CustomerDTO customer = getCustomerDTO(customerRequestDTO);
-        Mockito.when(customersRepository.getCustomerByDNI(customerRequestDTO.getDni())).thenReturn(Optional.of(customer));
+        Mockito.when(customersRepository.getCustomerByDNI(Mockito.anyString())).thenReturn(Optional.of(customer));
 
         // Act & Assert
         CustomerAlreadyExistsException thrownException = Assertions.assertThrows(
@@ -226,7 +226,7 @@ public class SearchEngineServiceTest {
         // Arrange
         List<CustomerDTO> customersList = getListOfCustomers();
         Mockito.when(customersRepository.getCustomers()).thenReturn(customersList);
-        Mockito.when(customersRepository.getCustomersWithFilter(new HashMap<>(), customersList)).thenReturn(customersList);
+        Mockito.when(customersRepository.getCustomersWithFilter(Mockito.anyMap(), Mockito.anyList())).thenReturn(customersList);
 
         // Act
         ListResponseDTO<CustomerDTO> result = this.searchEngineService.getCustomers(new HashMap<>());
